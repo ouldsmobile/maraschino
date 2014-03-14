@@ -9,7 +9,7 @@ from maraschino import logger
 @app.route('/')
 @requires_auth
 def index():
-    from maraschino.models import Module, Setting, Application, XbmcServer
+    from maraschino.models import Module, Setting, Application
     from maraschino.database import db_session
 
     unorganised_modules = Module.query.order_by(Module.position)
@@ -84,61 +84,14 @@ def index():
 
     # get list of servers
 
-    servers = XbmcServer.query.order_by(XbmcServer.position)
-
-    if servers.count() == 0:
-        # check if old server settings value is set
-        old_server_hostname = get_setting_value('server_hostname')
-
-        # create an XbmcServer entry using the legacy settings
-        if old_server_hostname:
-            xbmc_server = XbmcServer(
-                'XBMC server 1',
-                1,
-                old_server_hostname,
-                get_setting_value('server_port'),
-                get_setting_value('server_username'),
-                get_setting_value('server_password'),
-                get_setting_value('server_macaddress'),
-            )
-
-            try:
-                db_session.add(xbmc_server)
-                db_session.commit()
-                servers = XbmcServer.query.order_by(XbmcServer.position)
-
-            except:
-                logger.log('Could not create new XbmcServer based on legacy settings' , 'WARNING')
-
-    active_server = get_setting_value('active_server')
-
-    if active_server and active_server != 'undefined':
-        active_server = int(active_server)
-    else:
-        active_server = 1
-
-    # show currently playing bar?
-    if get_setting_value('show_currently_playing') == None:
-        show_currently_playing = True
-    else:
-        show_currently_playing = int(get_setting_value('show_currently_playing')) > 0
 
     return render_template('index.html',
         modules=modules,
         num_columns=num_columns,
-        servers=servers,
-        active_server=active_server,
-        show_currently_playing=show_currently_playing,
         search_enabled=get_setting_value('search') == '1',
         background=background,
-        fanart_backgrounds=fanart_backgrounds,
         applications=applications,
         show_tutorial=unorganised_modules.count() == 0,
-        show_music=get_setting_value('library_show_music') == '1',
-        show_pvr=get_setting_value('library_show_pvr') == '1',
-        show_files=get_setting_value('library_show_files') == '1',
-        show_power=get_setting_value('library_show_power_buttons') == '1',
-        library_app_link="http://xbmc.org/" if safe_server_address() is None else safe_server_address(),
         webroot=maraschino.WEBROOT,
         kiosk=maraschino.KIOSK,
         new_tab=new_tab,

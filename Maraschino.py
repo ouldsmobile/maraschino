@@ -45,17 +45,12 @@ if check_frozen():
 def import_modules():
     """All modules that are available in Maraschino are at this point imported."""
     import modules.applications
-    import modules.controls
     import modules.couchpotato
-    import modules.currently_playing
     import modules.diskspace
     import modules.headphones
     import modules.index
-    import modules.library
     import modules.log
     import modules.nzbget
-    import modules.recently_added
-    import modules.remote
     import modules.sabnzbd
     import modules.script_launcher
     import modules.search
@@ -66,8 +61,6 @@ def import_modules():
     import modules.updater
     import modules.utorrent
     import modules.weather
-    import modules.xbmc_notify
-    import mobile
     import modules.ipcamera
 
 
