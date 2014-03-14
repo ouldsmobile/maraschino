@@ -127,21 +127,6 @@ class Script(Base):
         return '<Script %r>' % (self.label)
 
 
-class RecentlyAdded(Base):
-    __tablename__ = 'recently_added'
-    id = Column(Integer, primary_key=True)
-    name = Column(String(100))
-    data = Column(PickleType)
-
-
-    def __init__(self, name, data=[]):
-        self.name = name
-        self.data = data
-
-    def __repr__(self):
-        return '<RecentlyAdded %r>' % (self.name)
-
-
 class NewznabSite(Base):
     __tablename__ = 'newznab'
     id = Column(Integer, primary_key=True)

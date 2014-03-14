@@ -547,32 +547,10 @@ AVAILABLE_MODULES = [
 
 MISC_SETTINGS = [
     {
-        'key': 'show_currently_playing',
-        'value': '1',
-        'description': 'Show currently playing bar',
-        'type': 'select',
-        'options': [
-            {'value': '1', 'label': 'Yes'},
-            {'value': '2', 'label': 'Minimized'},
-            {'value': '0', 'label': 'No'},
-        ]
-    },
-    {
-        'key': 'fanart_backgrounds',
-        'value': '0',
-        'description': 'Show fanart backgrounds when watching media',
-        'type': 'bool',
-    },
-    {
         'key': 'random_backgrounds',
         'value': '0',
         'description': 'Use a random background when not watching media',
         'type': 'bool',
-    },
-    {
-        'key': 'remote_inactivity_enable',
-        'value': '60',
-        'description': 'Disable remote control after x seconds of inactivity (0 to disable)',
     },
     {
         'key': 'num_columns',

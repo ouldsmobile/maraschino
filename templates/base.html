@@ -63,20 +63,14 @@
       <div id="extra_settings">
         <div class="inner"></div>
         <ul>
-          <li id="remote_icon">Remote control</li>
           <li id="activate_search">
             Search
             <div id="search_settings" class="settings edit">Edit</div>
           </li>
           {% include 'includes/manage.html' %}
-          {% include 'includes/servers.html' %}
         </ul>
       </div>
     {% endif %}
-
-    <!-- fanart container -->
-
-    <div id="fanart" style="display: none;"></div>
 
     {% block content %}{% endblock %}
 
