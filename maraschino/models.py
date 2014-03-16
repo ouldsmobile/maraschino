@@ -65,25 +65,6 @@ class Application(Base):
         return '<Application %r>' % (self.name)
 
 
-class Disk(Base):
-    """Old diskspace module table. No longer in use."""
-    __tablename__ = 'disks'
-    id = Column(Integer, primary_key=True)
-    path = Column(String(500))
-    position = Column(Integer)
-
-    def __init__(self, path, position=None):
-        self.path = path
-
-        if position == None:
-            self.position = highest_position(Disk)
-        else:
-            self.position = position
-
-    def __repr__(self):
-        return '<Disk %r>' % (self.path)
-
-
 class HardDisk(Base):
     """Table for one disk in the diskspace module"""
     __tablename__ = 'disks2'
@@ -102,7 +83,6 @@ class HardDisk(Base):
 
     def __repr__(self):
         return '<HardDisk %r>' % (self.position)
-
 
 
 class Script(Base):

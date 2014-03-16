@@ -49,8 +49,10 @@ def import_modules():
     import modules.diskspace
     import modules.headphones
     import modules.index
+    import modules.ipcamera
     import modules.log
     import modules.nzbget
+    import modules.plex_recently_added
     import modules.sabnzbd
     import modules.script_launcher
     import modules.search
@@ -61,7 +63,6 @@ def import_modules():
     import modules.updater
     import modules.utorrent
     import modules.weather
-    import modules.ipcamera
 
 
 @app.teardown_request

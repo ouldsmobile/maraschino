@@ -189,6 +189,26 @@ AVAILABLE_MODULES = [
         ]
     },
     {
+        'name': 'plex_on_deck',
+        'label': 'Plex - On Deck',
+        'description': 'Episodes on your Plex Library Deck',
+        'static': False,
+        'poll': 0,
+        'delay': 0,
+        'settings': [
+            {
+                'key': 'plex_ip',
+                'value': '',
+                'description': 'Plex Server IP Address',
+            },
+            {
+                'key': 'plex_port',
+                'value': '32400',
+                'description': 'Plex Server Port',
+            },
+        ]
+    },
+    {
         'name': 'nzbget',
         'label': 'Usenet - NZBGet',
         'description': 'Shows you information about your NZBGet downloads.',

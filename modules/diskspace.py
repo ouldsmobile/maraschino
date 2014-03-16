@@ -5,16 +5,11 @@ from maraschino import app, logger
 from maraschino.tools import requires_auth, format_number, get_setting_value
 from maraschino.database import db_session
 
-from maraschino.models import Disk, HardDisk
+from maraschino.models import HardDisk
 
 @app.route('/xhr/diskspace/')
 @requires_auth
 def xhr_diskspace():
-    # Legacy check
-    disks_db_old = Disk.query.order_by(Disk.position)
-    if disks_db_old.count() > 0:
-        legacy_disk_migrate()
-
     disks = {'groups':[], 'disks':[]}
 
     # Get list of disks from database
@@ -173,26 +168,3 @@ def disk_usage(path):
         'free': free,
         'percentage_used': int((float(used)/float(total))*100),
     }
-
-def legacy_disk_migrate():
-    logger.log('DISKSPACE :: Migrating legacy disks', 'INFO')
-
-    disks_db_old = Disk.query.order_by(Disk.position)
-    for disk_old in disks_db_old:
-
-        disk = HardDisk(
-            data={
-                'path': disk_old.path,
-                'name': disk_old.path,
-                'group': '',
-            },
-            position=disk_old.position
-        )
-
-        try:
-            db_session.add(disk)
-            db_session.delete(disk_old)
-            db_session.commit()
-
-        except:
-            return jsonify({'status': 'error'})

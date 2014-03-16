@@ -1,0 +1,26 @@
+<div id="plex_on_deck" class="module generic" data-module="plex_on_deck">
+
+  <div class="module_settings"><span>Settings</span></div>
+  <div class="module_remove"><span>Remove</span></div>
+  
+    <h2>TV</h2>
+    <ul class="tv_deck">
+        {% for x in p %}
+            {% if "episode" in x.type %}
+                <li>
+                    <img src="{{address}}{{x.grandparentThumb}}">
+                </li>
+            {% endif %}
+        {% endfor %}
+    </ul>
+    <h2>Movies</h2>
+    <ul class="movie_deck">
+        {% for x in p %}
+            {% if "movie" in x.type %}
+                <li>
+                    <img src="{{address}}{{x.thumb}}">
+                </li>
+            {% endif %}
+        {% endfor %}
+    </ul>
+</div>
