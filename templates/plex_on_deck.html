@@ -2,25 +2,34 @@
 
     <div class="module_settings"><span>Settings</span></div>
     <div class="module_remove"><span>Remove</span></div>
-    <h2>Plex OnDeck</h2>
-    <ul>
-        {% for x in video['Video'] %}
-            <li data-url="{{x['@key']}}">
-                {% if "episode" in x['@type'] %}
-                    <a href="http://plex.tv/web/app#!/server/{{machineId}}/details/{{x['@key']|replace('/', '%2F')}}" target="_blank">
-                        <img src="{{address}}{{x['@grandparentThumb']}}">
-                        <p>{{x['@parentIndex']}}x{{x['@index']}}
-                    </a>
-                {% elif "movie" in x['@type'] %}
-                    <a href="http://plex.tv/web/app#!/server/{{machineId}}/details/{{x['@key']|replace('/', '%2F')}}" target="_blank">
-                        <img src="{{address}}{{x['@thumb']}}">
-                    </a>
-                {% endif %}
-            </li>
-        {% endfor %}
-    </ul>
     {% if error %}
+        <h2>Plex ERROR</h2>
         <p class"error">Problem reaching Plex on address {{address}}</p>
         <p>{{ exception }}</p>
+    {% else %}
+        <h2>Plex OnDeck</h2>
+        <ul class="plexMenu">
+        {% for s in sections['Directory']%}
+            <li data-key={{ s['@key'] }} style="background: url({{address}}{{ s['@thumb']}}">
+                <span>{{ s['@title'] }}</span>
+            </li>
+        {%endfor%}
+        </ul>
+        <ul class="onDeck">
+            {% for x in video['Video'] %}
+                <li data-url="{{x['@key']}}">
+                    {% if "episode" in x['@type'] %}
+                        <a href="http://plex.tv/web/app#!/server/{{machineId}}/details/{{x['@key']|replace('/', '%2F')}}" target="_blank">
+                            <img src="{{address}}{{x['@grandparentThumb']}}">
+                            <p>{{x['@parentIndex']}}x{{x['@index']}}
+                        </a>
+                    {% elif "movie" in x['@type'] %}
+                        <a href="http://plex.tv/web/app#!/server/{{machineId}}/details/{{x['@key']|replace('/', '%2F')}}" target="_blank">
+                            <img src="{{address}}{{x['@thumb']}}" class="movie">
+                        </a>
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ul>
     {% endif %}
 </div>

@@ -18,5 +18,9 @@ class PlexLibrary(object):
         return self.s.query('library/sections')
 
 
+    def getSection(self, id):
+        return self.s.query('library/sections/%s/all' % id)
+
+
     def machineId(self, username, password):
         return self.s.machineId(username, password)

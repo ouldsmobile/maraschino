@@ -1,0 +1,32 @@
+<div id="plex_section" class="module generic" data-module="plex_on_deck">
+
+    <div class="module_settings"><span>Settings</span></div>
+    <div class="module_remove"><span>Remove</span></div>
+    <h2>Plex {{ video['@librarySectionTitle'] }}</h2>
+    <ul class="plexMenu">
+    {% for s in sections['Directory'] %}
+        <li data-key={{ s['@key'] }} style="background: url({{address}}{{ s['@thumb']}}">
+            <span>{{ s['@title'] }}</span>
+        </li>
+    {% endfor %}
+    </ul>
+    <ul class="section noscroll">
+        {% if "show" in video['@viewGroup'] %}
+            {% for x in video['Directory'] %}
+                <li data-url="{{x['@ratingKey']}}">
+                    <a href="http://plex.tv/web/app#!/server/{{machineId}}/details/{{x['@key']|replace('/', '%2F')|replace('children', '')}}" target="_blank">
+                        <p>{{ x['@title'] }}</p>
+                    </a>
+                </li>
+            {% endfor %}
+        {% else %}
+            {% for x in video['Video'] %}
+                <li data-url="{{x['@key']}}">
+                    <a href="http://plex.tv/web/app#!/server/{{machineId}}/details/{{x['@key']|replace('/', '%2F')}}" target="_blank">
+                        <p>{{x['@title']}} ({{x['@year']}}) </p>
+                    </a>
+                </li>
+            {% endfor %}
+        {% endif %}
+    </ul>
+</div>

@@ -198,6 +198,16 @@ $(document).ready(function() {
     });
   });
 
+  /*** PLEX ***/
+  $(document).on('click', 'div[id^=plex].module .plexMenu li', function(){
+    $(this).children().css('background', 'url('+WEBROOT+'/static/images/xhrloading.gif) no-repeat center').html('&nbsp;');
+    id = $(this).data('key');
+    $.get(WEBROOT + '/xhr/plex/section/'+id, function(data){
+      $('div[id^=plex].module').replaceWith($(data));
+    });
+  });
+  /*** END PLEX ***/
+
   /*** SICKBEARD ***/
 
   // Loading wheel on menu click
