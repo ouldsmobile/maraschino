@@ -206,6 +206,16 @@ AVAILABLE_MODULES = [
                 'value': '32400',
                 'description': 'Plex Server Port',
             },
+            {
+                'key': 'myPlex_username',
+                'value': '',
+                'description': 'myPlex Username',
+            },
+            {
+                'key': 'myPlex_password',
+                'value': '',
+                'description': 'myPlex password',
+            },
         ]
     },
     {

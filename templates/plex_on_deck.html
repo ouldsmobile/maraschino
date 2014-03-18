@@ -1,26 +1,26 @@
 <div id="plex_on_deck" class="module generic" data-module="plex_on_deck">
 
-  <div class="module_settings"><span>Settings</span></div>
-  <div class="module_remove"><span>Remove</span></div>
-  
-    <h2>TV</h2>
-    <ul class="tv_deck">
-        {% for x in p %}
-            {% if "episode" in x.type %}
-                <li>
-                    <img src="{{address}}{{x.grandparentThumb}}">
-                </li>
-            {% endif %}
+    <div class="module_settings"><span>Settings</span></div>
+    <div class="module_remove"><span>Remove</span></div>
+    <h2>Plex OnDeck</h2>
+    <ul>
+        {% for x in video['Video'] %}
+            <li data-url="{{x['@key']}}">
+                {% if "episode" in x['@type'] %}
+                    <a href="http://plex.tv/web/app#!/server/{{machineId}}/details/{{x['@key']|replace('/', '%2F')}}" target="_blank">
+                        <img src="{{address}}{{x['@grandparentThumb']}}">
+                        <p>{{x['@parentIndex']}}x{{x['@index']}}
+                    </a>
+                {% elif "movie" in x['@type'] %}
+                    <a href="http://plex.tv/web/app#!/server/{{machineId}}/details/{{x['@key']|replace('/', '%2F')}}" target="_blank">
+                        <img src="{{address}}{{x['@thumb']}}">
+                    </a>
+                {% endif %}
+            </li>
         {% endfor %}
     </ul>
-    <h2>Movies</h2>
-    <ul class="movie_deck">
-        {% for x in p %}
-            {% if "movie" in x.type %}
-                <li>
-                    <img src="{{address}}{{x.thumb}}">
-                </li>
-            {% endif %}
-        {% endfor %}
-    </ul>
+    {% if error %}
+        <p class"error">Problem reaching Plex on address {{address}}</p>
+        <p>{{ exception }}</p>
+    {% endif %}
 </div>
