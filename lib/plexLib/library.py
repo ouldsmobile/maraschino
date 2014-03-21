@@ -2,8 +2,8 @@ from server import PlexServer
 
 class PlexLibrary(object):
     
-    def __init__(self, ip, port):
-        self.s = PlexServer(ip, port)
+    def __init__(self, ip, port=None):
+        self.s = PlexServer(ip=ip)
 
 
     def onDeck(self):
@@ -20,7 +20,3 @@ class PlexLibrary(object):
 
     def getSection(self, id):
         return self.s.query('library/sections/%s/all' % id)
-
-
-    def machineId(self, username, password):
-        return self.s.machineId(username, password)

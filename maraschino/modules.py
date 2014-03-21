@@ -189,23 +189,13 @@ AVAILABLE_MODULES = [
         ]
     },
     {
-        'name': 'plex_on_deck',
-        'label': 'Plex - On Deck',
-        'description': 'Episodes on your Plex Library Deck',
+        'name': 'plex',
+        'label': 'Plex Module',
+        'description': 'Check your Plex Server content - OnDeck and Library',
         'static': False,
         'poll': 0,
         'delay': 0,
         'settings': [
-            {
-                'key': 'plex_ip',
-                'value': '',
-                'description': 'Plex Server IP Address',
-            },
-            {
-                'key': 'plex_port',
-                'value': '32400',
-                'description': 'Plex Server Port',
-            },
             {
                 'key': 'myPlex_username',
                 'value': '',
@@ -855,6 +845,9 @@ def module_settings_save(name):
 
     if name == 'server_settings':
         return extra_settings_dialog(dialog_type='server_settings', updated=True)
+    elif name == 'plex':
+        from maraschino import updatePlexInfo
+        updatePlexInfo()
 
     # for everything else, return the rendered module
 

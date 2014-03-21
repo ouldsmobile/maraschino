@@ -1,0 +1,21 @@
+{% extends "plex.html" %}
+
+{% block content %}
+<h2>Plex OnDeck</h2>
+<ul class="onDeck">
+    {% for x in video['Video'] %}
+        <li data-url="{{x['@key']}}">
+            {% if "episode" in x['@type'] %}
+                <a href="http://plex.tv/web/app#!/server/{{machineId}}/details/{{x['@key']|replace('/', '%2F')}}" target="_blank">
+                    <img src="{{address}}{{x['@grandparentThumb']}}">
+                    <p>{{x['@parentIndex']}}x{{x['@index']}}
+                </a>
+            {% elif "movie" in x['@type'] %}
+                <a href="http://plex.tv/web/app#!/server/{{machineId}}/details/{{x['@key']|replace('/', '%2F')}}" target="_blank">
+                    <img src="{{address}}{{x['@thumb']}}" class="movie">
+                </a>
+            {% endif %}
+        </li>
+    {% endfor %}
+</ul>
+{% endblock %}

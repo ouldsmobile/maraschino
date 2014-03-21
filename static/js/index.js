@@ -199,11 +199,11 @@ $(document).ready(function() {
   });
 
   /*** PLEX ***/
-  $(document).on('click', 'div[id^=plex].module .plexMenu li', function(){
+  $(document).on('click', 'div#plex.module .plexMenu li', function(){
     $(this).children().css('background', 'url('+WEBROOT+'/static/images/xhrloading.gif) no-repeat center').html('&nbsp;');
     id = $(this).data('key');
-    $.get(WEBROOT + '/xhr/plex/section/'+id, function(data){
-      $('div[id^=plex].module').replaceWith($(data));
+    $.get(WEBROOT + '/xhr/plex/'+id, function(data){
+      $('div#plex.module').replaceWith($(data));
     });
   });
   /*** END PLEX ***/
@@ -1804,10 +1804,6 @@ $(document).ready(function() {
       function(data) {
         module.replaceWith(data);
         init_modules();
-
-        if (module_name == 'server_settings') {
-          poll_modules(['recently_added', 'recently_added_movies', 'recently_added_albums']);
-        }
       }
     );
   });

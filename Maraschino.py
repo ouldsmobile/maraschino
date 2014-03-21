@@ -52,7 +52,7 @@ def import_modules():
     import modules.ipcamera
     import modules.log
     import modules.nzbget
-    import modules.plex_recently_added
+    import modules.plex
     import modules.sabnzbd
     import modules.script_launcher
     import modules.search

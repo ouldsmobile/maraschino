@@ -5,9 +5,11 @@ from xmltodict import xmltodict
 
 class PlexServer(object):
 
-    def __init__(self, ip='192.168.0.10', port=32400):
+    def __init__(self, ip=None, port=32400, username=None, password=None):
         self.ip = ip
         self.port = port
+        self.username = username
+        self.password = password
 
 
     def __str__(self):
@@ -45,22 +47,15 @@ class PlexServer(object):
         
         return False
 
-    def machineId(self, username, password, ip=''):
-        machine = self.ip
-        if ip is not '':
-            machine = ip
 
+    def getServerInfo(self):
         try:
             r = urllib2.Request("https://plex.tv/pms/servers.xml")
-            base64string = base64.encodestring('%s:%s' % (username, password)).replace('\n', '')
+            base64string = base64.encodestring('%s:%s' % (self.username, self.password)).replace('\n', '')
             r.add_header("Authorization", "Basic %s" % base64string)
             r = urllib2.urlopen(r)
             el = xmltodict.parse(r.read())
-            for server in el['MediaContainer']['Server']:
-                if machine in server['@localAddresses']:
-                    return server['@machineIdentifier']
-        except urllib2.URLError, e:
-            print e
+            return el['MediaContainer']
+        except urllib2.URLError:
+            raise
 
-        # return "Machine not found with ip %s in account %s" %(machine, username)
-        return False

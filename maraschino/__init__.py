@@ -152,6 +152,7 @@ def initialize():
         SERVER = wsgiserver.CherryPyWSGIServer((HOST, PORT), d)
 
         __INITIALIZED__ = True
+        threading.Thread(target=updatePlexInfo).start()
         return True
 
 
@@ -184,6 +185,7 @@ def start_schedules():
         # check every 6 hours for a new version
         from maraschino.updater import checkGithub
         SCHEDULE.add_interval_job(checkGithub, hours=6)
+        SCHEDULE.add_interval_job(updatePlexInfo, hours=6)
     SCHEDULE.start()
 
 
@@ -273,6 +275,49 @@ def daemonize():
     if PIDFILE:
         logger.log('Writing PID %s to %s' % (pid, PIDFILE), 'INFO')
         file(PIDFILE, 'w').write("%s\n" % pid)
+
+
+def updatePlexInfo():
+    from plexLib import PlexServer as connect
+    from tools import get_setting_value
+    from maraschino.database import db_session
+    from maraschino.models import PlexServer
+    if not get_setting_value('myPlex_username') and not get_setting_value('myPlex_password'):
+        logger.log('Plex :: missing myPlex username and password', 'INFO')
+        return
+
+    logger.log('Plex :: Updating plex server information', 'INFO')
+    p = connect(
+        username=get_setting_value('myPlex_username'), 
+        password=get_setting_value('myPlex_password')
+    )
+    
+    if not p:
+        logger.log('Plex :: Failed to get Plex server.xml info', 'WARNING')
+        return
+
+    try:
+        servers = p.getServerInfo() # get servers from plex.tv server.xml
+        PlexServer.query.delete() # remove all servers from db so we can replace them
+        logger.log('Plex :: Deleted old PlexServers info from db', 'DEBUG')
+        for server in servers['Server']:
+            s = PlexServer(
+                server['@name'],
+                server['@localAddresses'],
+                server['@machineIdentifier'],
+                server['@version'],
+                server['@owned'],
+            )
+            
+            db_session.add(s)
+            logger.log('Plex :: Added PlexServer %s to db' %(server['@name']), 'DEBUG')
+
+        db_session.commit()
+    except Exception as e:
+        PlexServer.query.delete()
+        db_session.commit()
+        logger.log("Plex :: Failed to store plex servers into db: %s" % e, 'ERROR')
+
 
 
 @app.context_processor

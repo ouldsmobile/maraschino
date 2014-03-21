@@ -40,6 +40,27 @@ class Setting(Base):
         return '<Setting %r>' % (self.key)
 
 
+class PlexServer(Base):
+    """Table for plex server from the server.xml file on plex.tv"""
+    __tablename__ = 'plexserver'
+    id = Column(Integer, primary_key=True)
+    name = Column(String(100))
+    ip = Column(String(100))
+    machineIdentifier = Column(String(100))
+    version = Column(String(100))    
+    owned = Column(Integer)
+    def __init__(self, name, ip, machineIdentifier, version, owned):
+        self.name = name
+        self.ip = ip
+        self.machineIdentifier = machineIdentifier
+        self.version = version
+        self.owned = owned
+
+
+    def __repr__(self):
+        return '<PlexServer %r @ %s>' % (self.name, self.ip)
+        
+
 class Application(Base):
     """Table for one application in the applications module"""
     __tablename__ = 'applications'

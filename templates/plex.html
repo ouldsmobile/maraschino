@@ -1,0 +1,26 @@
+<div id="plex" class="module generic" data-module="plex">
+
+    <div class="module_settings"><span>Settings</span></div>
+    <div class="module_remove"><span>Remove</span></div>
+    {% if error %}
+        <div c>        
+            <h2>Plex ERROR</h2>
+            <p class"error">Problem reaching Plex</p>
+            <p>{{ exception }}</p>
+        </div>    
+    {% else %}
+        <ul class="menu plexMenu">
+            <li class="onDeck" data-key="onDeck" title="On Deck">
+                <span>On Deck</span>
+            </li>
+            {% for s in sections['Directory'] %}
+                <li data-key="section/{{ s['@key']}}" title="{{s['@title']}}">
+                    <span style="background-image: url({{address}}{{ s['@thumb']}})">{{ s['@title'] }}</span>
+                </li>
+            {% endfor %}
+        </ul>
+
+        {% block content %}{% endblock %}
+
+    {%endif%}
+</div>
