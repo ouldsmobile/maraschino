@@ -199,6 +199,19 @@ $(document).ready(function() {
   });
 
   /*** PLEX ***/
+  // tutorial settings save on change input
+  $(document).on('change', '#tutorial input#myPlex_username, #tutorial input#myPlex_password', function(event) {
+    event.preventDefault();
+    var settings = $(this).parent().find('input').serializeArray();
+    settings[0].name = 'myPlex_'+settings[0].name;
+    var request = $.post(WEBROOT + '/xhr/module_settings_save/plex',
+      { settings: JSON.stringify(settings) }
+    );
+    request.error(function(jqXHR, textStatus, errorThrown){
+      popup_message('Could not save myPlex info: ' + errorThrown);
+    })
+  });
+
   $(document).on('click', 'div#plex.module .plexMenu li', function(){
     $(this).children().css('background', 'url('+WEBROOT+'/static/images/xhrloading.gif) no-repeat center').html('&nbsp;');
     id = $(this).data('key');

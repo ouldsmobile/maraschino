@@ -30,7 +30,7 @@ def plex():
         if s is not None:     
             return xhr_on_deck()
         else:
-            return error('No PlexServer in db. Please check your myPlex username and password')
+            return error('No PlexServer in db. Please check your myPlex username and password.')
     except:
         return error('Failed to read PlexServer from db')
 

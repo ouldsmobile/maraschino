@@ -301,23 +301,20 @@ def updatePlexInfo():
         PlexServer.query.delete() # remove all servers from db so we can replace them
         logger.log('Plex :: Deleted old PlexServers info from db', 'DEBUG')
         for server in servers['Server']:
+            logger.log('Plex :: Adding PlexServer %s to db' %(server['@name']), 'DEBUG')
             s = PlexServer(
                 server['@name'],
                 server['@localAddresses'],
                 server['@machineIdentifier'],
                 server['@version'],
-                server['@owned'],
+                int(server['@owned']),
             )
             
             db_session.add(s)
-            logger.log('Plex :: Added PlexServer %s to db' %(server['@name']), 'DEBUG')
 
         db_session.commit()
     except Exception as e:
-        PlexServer.query.delete()
-        db_session.commit()
-        logger.log("Plex :: Failed to store plex servers into db: %s" % e, 'ERROR')
-
+        logger.log("Plex :: Failed to store plex servers into db, keeping old info: %s" % e, 'ERROR')
 
 
 @app.context_processor
