@@ -1,24 +1,68 @@
 {% extends "plex.html" %}
 
 {% block content %}
-<h2>Plex {{ video['@librarySectionTitle'] }}</h2>
+<h2>Plex {{ media['@librarySectionTitle'] }}</h2>
 <ul class="section noscroll">
-    {% if "show" in video['@viewGroup'] %}
-        {% for x in video['Directory'] %}
-            <li data-url="{{x['@ratingKey']}}">
-                <a href="http://plex.tv/web/app#!/server/{{id}}/details/{{x['@key']|replace('/', '%2F')|replace('children', '')}}" target="_blank">
-                    <p>{{ x['@title'] }}</p>
-                </a>
-            </li>
-        {% endfor %}
+    {% if "1" not in media['@size'] %}
+        {% if "show" in media['@viewGroup'] %}
+            {% for x in media['Directory'] %}
+                <li data-url="{{x['@ratingKey']}}">
+                    <a href="http://plex.tv/web/app#!/server/{{id}}/details/{{x['@key']|replace('/', '%2F')|replace('children', '')}}" target="_blank">
+                        <p>{{ x['@title'] }}</p>
+                    </a>
+                </li>
+            {% endfor %}
+        {% elif "movie" in media['@viewGroup'] %}
+            {% for x in media['Video'] %}
+                <li data-url="{{x['@key']}}">
+                    <a href="http://plex.tv/web/app#!/server/{{id}}/details/{{x['@key']|replace('/', '%2F')}}" target="_blank">
+                        <p>{{x['@title']}} ({{x['@year']}}) </p>
+                    </a>
+                </li>
+            {% endfor %}
+        {% elif "artist" in media['@viewGroup'] %}
+            {% for x in media['Directory'] %}
+                <li data-url="{{x['@key']}}">
+                    <a href="http://plex.tv/web/app#!/server/{{id}}/details/{{x['@key']|replace('/', '%2F')}}" target="_blank">
+                        <p>{{x['@title']}} </p>
+                    </a>
+                </li>
+            {% endfor %}
+        {% else %}
+            {% for x in media['Photo'] %}
+                <li data-url="{{x['@key']}}">
+                    <a href="http://plex.tv/web/app#!/server/{{id}}/details/{{x['@key']|replace('/', '%2F')}}" target="_blank">
+                        <p>{{x['@title']}} </p>
+                    </a>
+                </li>
+            {% endfor %}
+        {% endif %}
     {% else %}
-        {% for x in video['Video'] %}
-            <li data-url="{{x['@key']}}">
-                <a href="http://plex.tv/web/app#!/server/{{id}}/details/{{x['@key']|replace('/', '%2F')}}" target="_blank">
-                    <p>{{x['@title']}} ({{x['@year']}}) </p>
+        {% if "show" in media['@viewGroup'] %}
+            <li data-url="{{media['Directory']['@ratingKey']}}">
+                <a href="http://plex.tv/web/app#!/server/{{id}}/details/{{media['Directory']['@key']|replace('/', '%2F')|replace('children', '')}}" target="_blank">
+                    <p>{{ media['Directory']['@title'] }}</p>
                 </a>
             </li>
-        {% endfor %}
+        {% elif "movie" in media['@viewGroup'] %}
+            <li data-url="{{media['Video']['@key']}}">
+                <a href="http://plex.tv/web/app#!/server/{{id}}/details/{{media['Video']['@key']|replace('/', '%2F')}}" target="_blank">
+                    <p>{{media['Video']['@title']}} ({{media['Video']['@year']}}) </p>
+                </a>
+            </li>
+        {% elif "artist" in media['@viewGroup'] %}
+            <li data-url="{{media['Directory']['@key']}}">
+                <a href="http://plex.tv/web/app#!/server/{{id}}/details/{{media['Directory']['@key']|replace('/', '%2F')}}" target="_blank">
+                    <p>{{media['Directory']['@title']}} </p>
+                </a>
+            </li>
+        {% else %}
+            <li data-url="{{media['Photo']['@key']}}">
+                <a href="http://plex.tv/web/app#!/server/{{id}}/details/{{media['Photo']['@key']|replace('/', '%2F')}}" target="_blank">
+                    <p>{{media['Photo']['@title']}} </p>
+                </a>
+            </li>
+        {% endif %}
     {% endif %}
 </ul>
 {% endblock %}

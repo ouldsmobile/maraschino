@@ -122,7 +122,7 @@ def xhr_plex_section(id):
         items = p.getSection(id)
         return render_template('plex/library_section.html',
             server=s,
-            video=items['MediaContainer'],
+            media=items['MediaContainer'],
             address=safeAddress(s.ip),
         )
     except Exception as e:
