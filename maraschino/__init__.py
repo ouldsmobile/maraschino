@@ -282,7 +282,7 @@ def updatePlexInfo():
     from tools import get_setting_value
     from maraschino.database import db_session
     from maraschino.models import PlexServer
-    if not get_setting_value('myPlex_username') and not get_setting_value('myPlex_password'):
+    if not get_setting_value('myPlex_username') or not get_setting_value('myPlex_password'):
         logger.log('Plex :: missing myPlex username and password', 'INFO')
         return
 
@@ -298,23 +298,31 @@ def updatePlexInfo():
 
     try:
         servers = p.getServerInfo() # get servers from plex.tv server.xml
-        PlexServer.query.delete() # remove all servers from db so we can replace them
-        logger.log('Plex :: Deleted old PlexServers info from db', 'DEBUG')
         for server in servers['Server']:
-            logger.log('Plex :: Adding PlexServer %s to db' %(server['@name']), 'DEBUG')
-            s = PlexServer(
-                server['@name'],
-                server['@localAddresses'],
-                server['@machineIdentifier'],
-                server['@version'],
-                int(server['@owned']),
-            )
+            s = PlexServer.query.filter(PlexServer.machineIdentifier == server['@machineIdentifier']).first()
+            if s:
+                logger.log('Plex :: Updating PlexServer %s in db' %(server['@name']), 'DEBUG')
+                s.name = server['@name']
+                s.localAddresses = server['@localAddresses']
+                s.machineIdentifier = server['@machineIdentifier']
+                s.version = server['@version']
+                s.owned = int(server['@owned'])
+
+            else:
+                logger.log('Plex :: Adding PlexServer %s to db' %(server['@name']), 'DEBUG')
+                s = PlexServer(
+                    server['@name'],
+                    server['@localAddresses'],
+                    server['@machineIdentifier'],
+                    server['@version'],
+                    int(server['@owned']),
+                )
             
             db_session.add(s)
-
         db_session.commit()
     except Exception as e:
-        logger.log("Plex :: Failed to store plex servers into db, keeping old info: %s" % e, 'ERROR')
+        logger.log("Plex :: Failed to update plex servers in db: %s" % e, 'ERROR')
+        raise
 
 
 @app.context_processor

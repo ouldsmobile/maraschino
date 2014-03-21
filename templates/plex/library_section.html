@@ -6,7 +6,7 @@
     {% if "show" in video['@viewGroup'] %}
         {% for x in video['Directory'] %}
             <li data-url="{{x['@ratingKey']}}">
-                <a href="http://plex.tv/web/app#!/server/{{machineId}}/details/{{x['@key']|replace('/', '%2F')|replace('children', '')}}" target="_blank">
+                <a href="http://plex.tv/web/app#!/server/{{id}}/details/{{x['@key']|replace('/', '%2F')|replace('children', '')}}" target="_blank">
                     <p>{{ x['@title'] }}</p>
                 </a>
             </li>
@@ -14,7 +14,7 @@
     {% else %}
         {% for x in video['Video'] %}
             <li data-url="{{x['@key']}}">
-                <a href="http://plex.tv/web/app#!/server/{{machineId}}/details/{{x['@key']|replace('/', '%2F')}}" target="_blank">
+                <a href="http://plex.tv/web/app#!/server/{{id}}/details/{{x['@key']|replace('/', '%2F')}}" target="_blank">
                     <p>{{x['@title']}} ({{x['@year']}}) </p>
                 </a>
             </li>

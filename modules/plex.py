@@ -1,14 +1,14 @@
 from flask import render_template
 from maraschino import app, logger
-from maraschino.tools import get_setting_value
+from maraschino.tools import get_setting_value, requires_auth
 from maraschino.models import PlexServer as dbserver
 
 from plexLib import PlexLibrary, PlexServer
 from xmltodict import xmltodict
 
 
-def safeAddress(ip):
-    return "http://%s:32400" % (ip)
+def safeAddress(ip, port=32400):
+    return "http://%s:%s" % (ip, port)
 
 
 def error(e):
@@ -19,15 +19,64 @@ def error(e):
     )
 
 
-def plex_log(msg, level):
-    logger.log(msg, level)
+def plex_log(msg, level='INFO'):
+    logger.log('Plex :: %s'%(msg), level)
+
+
+@app.route('/xhr/plex/listSections/<int:id>/')
+@requires_auth
+def plexListSection(id):
+    try:
+        plex = dbserver.query.filter(dbserver.id == id).first()
+        for item in plex.sections:
+            print item
+            for k in plex.sections[item]:
+                print "\t%s - %s" % (k, plex.sections[item][k])
+
+        return 'Check terminal'
+    except Exception, e:
+        raise e    
+
+
+@app.route('/xhr/plex/updateSections/<int:id>/')
+@requires_auth
+def plexUpdateSections(id):
+    from maraschino.database import db_session
+    db_section = {}
+    try:
+        plex = dbserver.query.filter(dbserver.id == id).first()
+        p = PlexLibrary(plex.ip)
+        sections = p.sections()
+        for section in sections['MediaContainer']['Directory']:
+            db_section.update(
+                {
+                    section['@uuid']: 
+                    {
+                        'key': section['@key'],
+                        'type': section['@type'],
+                        'title': section['@title']
+                    }
+                }
+            )
+        plex.sections = db_section
+        db_session.add(plex)
+        db_session.commit()
+        plex_log('Successfully updated %s sections' % plex.name)
+        return True
+    except Exception, e:
+        plex_log(e, 'ERROR')
+
+    return False
 
 
 @app.route('/xhr/plex/')
 def plex():
     try:
         s = dbserver.query.filter(dbserver.owned == 1).first()
-        if s is not None:     
+        if s is not None:
+            if not s.sections:
+                plexUpdateSections(id=s.id)
+
             return xhr_on_deck()
         else:
             return error('No PlexServer in db. Please check your myPlex username and password.')
@@ -41,12 +90,10 @@ def xhr_on_deck():
         s = dbserver.query.filter(dbserver.owned == 1).first()
         p = PlexLibrary(s.ip)
         onDeck = p.onDeck()
-        sections = p.sections()
         return render_template('plex/on_deck.html',
-            machineId=s.machineIdentifier,
+            server=s,
             video=onDeck['MediaContainer'],
             address=safeAddress(s.ip),
-            sections=sections['MediaContainer'],
         )
     except Exception as e:
         return error(e)
@@ -58,8 +105,8 @@ def xhr_recently_added():
         s = dbserver.query.order_by(dbserver.id).first()
         p = PlexLibrary(s.ip)
         recentlyAdded = p.recentlyAdded()
-        return render_template('plex/on_deck.html',
-            machineId=s.machineIdentifier,
+        return render_template('plex/recently_added.html',
+            server=s,
             video=recentlyAdded['MediaContainer'],
             address=safeAddress(s.ip),
         )
@@ -73,12 +120,10 @@ def xhr_plex_section(id):
         s = dbserver.query.order_by(dbserver.id).first()
         p = PlexLibrary(s.ip)
         items = p.getSection(id)
-        sections = p.sections()
         return render_template('plex/library_section.html',
-            machineId=s.machineIdentifier,
+            server=s,
             video=items['MediaContainer'],
             address=safeAddress(s.ip),
-            sections=sections['MediaContainer'],
         )
     except Exception as e:
         return error(e)

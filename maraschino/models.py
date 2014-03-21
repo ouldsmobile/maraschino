@@ -49,17 +49,19 @@ class PlexServer(Base):
     machineIdentifier = Column(String(100))
     version = Column(String(100))    
     owned = Column(Integer)
-    def __init__(self, name, ip, machineIdentifier, version, owned):
+    sections = Column(PickleType)
+
+    def __init__(self, name, ip, machineIdentifier, version, owned, sections={}):
         self.name = name
         self.ip = ip
         self.machineIdentifier = machineIdentifier
         self.version = version
         self.owned = owned
-
+        self.sections = sections
 
     def __repr__(self):
         return '<PlexServer %r @ %s>' % (self.name, self.ip)
-        
+
 
 class Application(Base):
     """Table for one application in the applications module"""
