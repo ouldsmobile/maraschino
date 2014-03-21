@@ -16,7 +16,7 @@
             </li>
             {% for s in server.sections %}
                 {% set section = server.sections[s] %}
-                <li data-key="{{section['type']}}" title="section['title']"> 
+                <li data-key="section/{{section['key']}}" title="section['title']"> 
                     <span class="{{section['type']}}">{{ section['title'] }} </span>
                 </li>
             {% endfor %}
