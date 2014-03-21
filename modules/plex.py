@@ -61,7 +61,7 @@ def plexUpdateSections(id):
         plex.sections = db_section
         db_session.add(plex)
         db_session.commit()
-        plex_log('Successfully updated %s sections' % plex.name)
+        plex_log('Successfully updated %s sections' % plex)
         return True
     except Exception, e:
         plex_log(e, 'ERROR')

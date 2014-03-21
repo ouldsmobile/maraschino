@@ -11,12 +11,14 @@
     {% else %}
         {% set id = server.machineIdentifier %}
         <ul class="menu plexMenu">
-            <li class="onDeck" data-key="onDeck" title="On Deck">
-                <span>On Deck</span>
+            <li data-key="onDeck" title="On Deck">
+                <span class="on_deck">On Deck</span>
             </li>
             {% for s in server.sections %}
                 {% set section = server.sections[s] %}
-                <li class="{{section['type']}} " data-key="{{section['type']}}" title="section['title']"> {{ section['title'] }} </li>
+                <li data-key="{{section['type']}}" title="section['title']"> 
+                    <span class="{{section['type']}}">{{ section['title'] }} </span>
+                </li>
             {% endfor %}
         </ul>
 
