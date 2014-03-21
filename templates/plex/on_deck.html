@@ -12,7 +12,14 @@
                 </a>
             {% elif "movie" in x['@type'] %}
                 <a href="http://plex.tv/web/app#!/server/{{id}}/details/{{x['@key']|replace('/', '%2F')}}" target="_blank">
-                    <img src="{{address}}{{x['@thumb']}}" class="movie">
+                    <img 
+                    src="
+                    {% if x['@thumb'] %}
+                        {{address}}{{x['@thumb']}}
+                    {% else %}
+                        {{ url_for('static', filename='images/poster.png') }}
+                    {% endif %}" 
+                    class="movie">
                 </a>
             {% endif %}
         </li>
