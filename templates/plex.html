@@ -3,9 +3,9 @@
     <div class="module_settings"><span>Settings</span></div>
     <div class="module_remove"><span>Remove</span></div>
     {% if error %}
-        <div>        
+        <div class="error">        
             <h2>Plex ERROR</h2>
-            <p class"error">Problem reaching Plex</p>
+            <p>Problem reaching Plex</p>
             <p>{{ exception }}</p>
         </div>    
     {% else %}
