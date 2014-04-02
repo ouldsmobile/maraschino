@@ -1,5 +1,5 @@
-from flask import Flask, jsonify, render_template, request
-import hashlib, random, urllib
+from flask import jsonify, render_template
+import random
 from maraschino.noneditable import *
 from maraschino.modules import *
 from maraschino.tools import requires_auth, get_setting_value
@@ -9,8 +9,7 @@ from maraschino import logger
 @app.route('/')
 @requires_auth
 def index():
-    from maraschino.models import Module, Setting, Application
-    from maraschino.database import db_session
+    from maraschino.models import Module, Application, PlexServer
 
     unorganised_modules = Module.query.order_by(Module.position)
 
@@ -79,11 +78,12 @@ def index():
         except:
             background = None
 
-    # show fanart backgrounds when watching media
-    fanart_backgrounds = get_setting_value('fanart_backgrounds') == '1'
 
     # get list of servers
-
+    servers = PlexServer.query.order_by(PlexServer.id)
+    active_server = get_setting_value('active_server')
+    if active_server:
+        active_server = int(active_server)
 
     return render_template('index.html',
         modules=modules,
@@ -96,7 +96,8 @@ def index():
         kiosk=maraschino.KIOSK,
         new_tab=new_tab,
         title_color=get_setting_value('title_color'),
-        remote_inactivity_enable=get_setting_value('remote_inactivity_enable')
+        servers=servers,
+        active_server=active_server,
     )
 
 @app.route('/xhr/shutdown')

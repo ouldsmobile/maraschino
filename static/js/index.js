@@ -202,13 +202,28 @@ $(document).ready(function() {
   // tutorial settings save on change input
   $(document).on('change', '#tutorial input#myPlex_username, #tutorial input#myPlex_password', function(event) {
     event.preventDefault();
-    var settings = $(this).parent().find('input').serializeArray();
+    if ($('#tutorial input#myPlex_username').val() === "" || $('#tutorial input#myPlex_password').val() === "" ) {
+      return;
+    }
+    var settings = $('#tutorial input').serializeArray();
     settings[0].name = 'myPlex_'+settings[0].name;
+    settings[1].name = 'myPlex_'+settings[1].name;
     var request = $.post(WEBROOT + '/xhr/module_settings_save/plex',
       { settings: JSON.stringify(settings) }
     );
     request.error(function(jqXHR, textStatus, errorThrown){
       popup_message('Could not save myPlex info: ' + errorThrown);
+    });
+
+    request.success(function(){
+      $.get(WEBROOT+'/xhr/plex/listServers/', function(data) {
+        if(data.success){
+          $('#server_settings .submenu ul').html('');
+          for (var i = 0; i < data.servers.length; i++) {
+            $('#server_settings .submenu ul').append('<li class="switch_server" data-server_id="'+data.servers[i][1]+'">'+data.servers[i][0]+'</li>');
+          }
+        }
+      });
     });
   });
 
@@ -247,6 +262,25 @@ $(document).ready(function() {
     }
   });
 
+  $(document).on('click', '#server_settings li.switch_server', function() {
+    if ($(this).hasClass('switch_server')) {
+      var li = $(this);
+
+      $.get(WEBROOT + '/xhr/switch_server/' + $(this).data('server_id'), function(data) {
+        if (data.status === 'error') {
+          popup_message('There was an error switching Plex servers.');
+          return;
+        }
+
+        li.closest('ul').find('.active').removeClass('active');
+        li.addClass('active');
+
+        $.get(WEBROOT + '/xhr/plex/onDeck', function(data){
+          $('div#plex.module').replaceWith($(data));
+        });
+      });
+    }
+  });
 
   /*** END PLEX ***/
 

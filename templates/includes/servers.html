@@ -1,0 +1,12 @@
+<li id="server_settings">
+  Plex Servers
+  <div class="submenu">
+    <ul>
+      {% for server in servers %}
+        <li class="switch_server{{ ' active' if server.id == active_server }}" data-server_id="{{ server.id }}">
+          {{ server.name }}
+        </li>
+      {% endfor %}
+    </ul>
+  </div>
+</li>

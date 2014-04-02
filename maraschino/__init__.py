@@ -49,53 +49,53 @@ FIRST_RUN = 0
 def initialize():
     """Init function for this module"""
     with INIT_LOCK:
-        
+
         global __INITIALIZED__, app, FULL_PATH, RUNDIR, ARGS, DAEMON, PIDFILE, VERBOSE, LOG_FILE, LOG_DIR, logger, PORT, SERVER, DATABASE, AUTH, \
             UPDATER, CURRENT_COMMIT, LATEST_COMMIT, COMMITS_BEHIND, COMMITS_COMPARE_URL, USE_GIT, WEBROOT, HOST, KIOSK, DATA_DIR, SCRIPT_DIR, \
             THREADS, FIRST_RUN
-        
+
         if __INITIALIZED__:
             return False
-        
+
         # Set up logger
         if not LOG_FILE:
             LOG_FILE = os.path.join(DATA_DIR, 'logs', 'maraschino.log')
-        
+
         FILENAME = os.path.basename(LOG_FILE)
         LOG_DIR = LOG_FILE[:-len(FILENAME)]
-        
+
         if not os.path.exists(LOG_DIR):
             try:
                 os.makedirs(LOG_DIR)
             except OSError:
                 if VERBOSE:
                     print 'Unable to create the log directory.'
-        
+
         logger = maraschinoLogger(LOG_FILE, VERBOSE)
-        
+
         #set up script dir
         if not SCRIPT_DIR:
             SCRIPT_DIR = os.path.join(DATA_DIR, 'scripts')
             if not os.path.exists(SCRIPT_DIR):
                 os.makedirs(SCRIPT_DIR)
-        
+
         # check if database exists or create it
         from database import init_db
-        
+
         if KIOSK:
             logger.log('Running in KIOSK Mode, settings disabled.', 'INFO')
-        
+
         try:
             logger.log('Opening database at: %s' % (DATABASE), 'INFO')
             open(DATABASE)
         except IOError:
             logger.log('Opening database failed', 'WARNING')
-            
+
             #Check if a version file exists. If not assume latest revision.
             version_file = os.path.join(DATA_DIR, 'Version.txt')
             if not os.path.exists(version_file):
                 FIRST_RUN = 1
-            
+
             try:
                 logger.log('Checking if PATH exists: %s' % (DATABASE), 'WARNING')
                 dbpath = os.path.dirname(DATABASE)
@@ -107,18 +107,18 @@ def initialize():
                         logger.log('Could not create %s.' % (DATABASE), 'CRITICAL')
                         print 'Could not create %s.' % (DATABASE)
                         quit()
-            
+
             except:
                 logger.log('Could not create %s.' % (DATABASE), 'CRITICAL')
                 quit()
-            
+
             logger.log('Database successfully initialised', 'INFO')
-        
+
         init_db()
-        
+
         # Web server settings
         from tools import get_setting_value
-        
+
         if get_setting_value('maraschino_port'):
             port_arg = False
             for arg in ARGS:
@@ -126,23 +126,23 @@ def initialize():
                     port_arg = True
             if not port_arg:
                 PORT = int(get_setting_value('maraschino_port'))
-        
+
         # Set up AUTH
         username = get_setting_value('maraschino_username')
         password = get_setting_value('maraschino_password')
-        
+
         if username and password != None:
             AUTH = {
                 'username': username,
                 'password': password
         }
-        
+
         # Set up web server
         if '--webroot' not in str(ARGS):
             WEBROOT = get_setting_value('maraschino_webroot')
             if WEBROOT is None or DEVELOPMENT:
                 WEBROOT = ''
-        
+
         if WEBROOT:
             if WEBROOT[0] != '/':
                 WEBROOT = '/' + WEBROOT
@@ -150,7 +150,7 @@ def initialize():
         else:
             d = wsgiserver.WSGIPathInfoDispatcher({'/': app})
         SERVER = wsgiserver.CherryPyWSGIServer((HOST, PORT), d)
-        
+
         __INITIALIZED__ = True
         threading.Thread(target=updatePlexInfo).start()
         return True
@@ -159,7 +159,7 @@ def initialize():
 def init_updater():
     from maraschino.updater import checkGithub, gitCurrentVersion
     global USE_GIT, CURRENT_COMMIT, COMMITS_BEHIND
-    
+
     if UPDATER:
         if os.name == 'nt':
             USE_GIT = False
@@ -167,7 +167,7 @@ def init_updater():
             USE_GIT = os.path.isdir(os.path.join(RUNDIR, '.git'))
             if USE_GIT:
                 gitCurrentVersion()
-        
+
         version_file = os.path.join(DATA_DIR, 'Version.txt')
         if os.path.isfile(version_file):
             f = open(version_file, 'r')
@@ -175,7 +175,7 @@ def init_updater():
             f.close()
         else:
             COMMITS_BEHIND = -1
-        
+
         threading.Thread(target=checkGithub).start()
 
 
@@ -192,9 +192,9 @@ def start_schedules():
 def start():
     """Start the actual server"""
     if __INITIALIZED__:
-        
+
         start_schedules()
-        
+
         if not DEVELOPMENT:
             try:
                 logger.log('Starting Maraschino on %s:%i%s' % (HOST, PORT, WEBROOT), 'INFO')
@@ -212,7 +212,7 @@ def start():
 def stop():
     """Shutdown Maraschino"""
     logger.log('Shutting down Maraschino...', 'INFO')
-    
+
     if not DEVELOPMENT:
         SERVER.stop()
     else:
@@ -221,9 +221,9 @@ def stop():
         if func is None:
             raise RuntimeError('Not running with the Werkzeug Server')
         func()
-    
+
     SCHEDULE.shutdown(wait=False)
-    
+
     if PIDFILE:
         logger.log('Removing pidfile: %s' % str(PIDFILE), 'INFO')
         os.remove(PIDFILE)
@@ -243,10 +243,10 @@ def daemonize():
     """Start Maraschino as a daemon"""
     if threading.activeCount() != 1:
         logger.log('There are %s active threads. Daemonizing may cause strange behavior.' % threading.activeCount(), 'WARNING')
-    
+
     sys.stdout.flush()
     sys.stderr.flush()
-    
+
     try:
         pid = os.fork()
         if pid == 0:
@@ -256,11 +256,11 @@ def daemonize():
             os._exit(0)
     except OSError, e:
         sys.exit('1st fork failed: %s [%d]' % (e.strerror, e.errno))
-    
+
     os.chdir('/')
     os.umask(0)
     os.setsid()
-    
+
     try:
         pid = os.fork()
         if pid > 0:
@@ -268,9 +268,9 @@ def daemonize():
             os._exit(0)
     except OSError, e:
         sys.exit('2nd fork failed: %s [%d]' % (e.strerror, e.errno))
-    
+
     pid = os.getpid()
-    
+
     logger.log('Daemonized to PID: %s' % pid, 'INFO')
     if PIDFILE:
         logger.log('Writing PID %s to %s' % (pid, PIDFILE), 'INFO')
@@ -280,10 +280,13 @@ def daemonize():
 def updatePlexInfo():
     from plexLib import PlexServer as connect
     from tools import get_setting_value
+    from flask import jsonify
+    from urllib2 import HTTPError
+
     if not get_setting_value('myPlex_username') or not get_setting_value('myPlex_password'):
-        logger.log('Plex :: missing myPlex username and password', 'INFO')
+        logger.log('Plex :: missing myPlex username or password', 'INFO')
         return
-    
+
     logger.log('Plex :: Updating plex server information', 'INFO')
     p = connect(
         username=get_setting_value('myPlex_username'),
@@ -294,7 +297,7 @@ def updatePlexInfo():
         logger.log('Plex :: Failed to get Plex server.xml info', 'WARNING')
         return
 
-    updated=[]    
+    updated=[]
     try:
         servers = p.getServerInfo() # get servers from plex.tv server.xml
         if servers['@size'] == '1':
@@ -306,9 +309,15 @@ def updatePlexInfo():
                 updated.append(server['@machineIdentifier'])
 
         removeStaleServers(updated)
+    except HTTPError as e:
+        if e.code == 401:
+            logger.log("Plex :: Wrong Username/Password: %s" % e.msg, 'ERROR')
+        else:
+            logger.log("Plex :: HTTP Error: %s" % e, 'ERROR')
+        return jsonify({'success': False, 'msg': e})
     except Exception as e:
         logger.log("Plex :: Failed to update plex servers in db: %s" % e, 'ERROR')
-        raise
+        return jsonify({'success': False, 'msg': e})
 
 
 def addPlexServer(name, localAddresses, machineIdentifier, version, owned):
@@ -322,7 +331,7 @@ def addPlexServer(name, localAddresses, machineIdentifier, version, owned):
         s.machineIdentifier = machineIdentifier
         s.version = version
         s.owned = int(owned)
-    
+
     else:
         logger.log('Plex :: Adding PlexServer %s to db' %(name), 'DEBUG')
         s = PlexServer(
@@ -332,7 +341,7 @@ def addPlexServer(name, localAddresses, machineIdentifier, version, owned):
            version,
            int(owned)
         )
-    
+
     db_session.add(s)
     db_session.commit()
 
@@ -347,7 +356,7 @@ def removeStaleServers(current):
             logger.log("Plex :: Removed %s from db as it is stale" % server, 'DEBUG')
 
     db_session.commit()
-    
+
 
 @app.context_processor
 def utility_processor():

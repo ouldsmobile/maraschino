@@ -1,6 +1,6 @@
 from flask import render_template, jsonify
 from maraschino import app, logger
-from maraschino.tools import requires_auth
+from maraschino.tools import requires_auth, get_setting_value
 from maraschino.models import PlexServer as dbserver
 
 from plexLib import PlexLibrary
@@ -20,6 +20,24 @@ def error(e):
 
 def plex_log(msg, level='INFO'):
     logger.log('Plex :: %s'%(msg), level)
+
+
+def getActiveServer():
+    selected_server = get_setting_value('active_server')
+    if selected_server is None:
+        plex_log('Server automatically selected by "owned" attribute', 'DEBUG')
+        return dbserver.query.filter(dbserver.owned == 1).first()
+
+    return dbserver.query.filter(dbserver.id == selected_server).first()
+
+
+@app.route('/xhr/plex/listServers/')
+def listDbServer():
+    servers = []
+    for s in dbserver.query.order_by(dbserver.id).all():
+        servers.append([s.name, s.id])
+
+    return jsonify({'success': True, 'servers': servers })
 
 
 @app.route('/xhr/plex/listSections/<int:id>/')
@@ -71,7 +89,7 @@ def plexUpdateSections(id):
 @app.route('/xhr/plex/')
 def plex():
     try:
-        s = dbserver.query.filter(dbserver.owned == 1).first()
+        s = getActiveServer()
         if s is not None:
             if not s.sections:
                 plexUpdateSections(id=s.id)
@@ -86,7 +104,7 @@ def plex():
 @app.route('/xhr/plex/onDeck/')
 def xhr_on_deck():
     try:
-        s = dbserver.query.filter(dbserver.owned == 1).first()
+        s = getActiveServer()
         p = PlexLibrary(s.ip)
         onDeck = p.onDeck()
         return render_template('plex/on_deck.html',
@@ -101,7 +119,7 @@ def xhr_on_deck():
 @app.route('/xhr/plex/recentlyAdded/')
 def xhr_recently_added():
     try:
-        s = dbserver.query.order_by(dbserver.id).first()
+        s = getActiveServer()
         p = PlexLibrary(s.ip)
         recentlyAdded = p.recentlyAdded()
         return render_template('plex/recently_added.html',
@@ -116,7 +134,7 @@ def xhr_recently_added():
 @app.route('/xhr/plex/section/<int:id>/')
 def xhr_plex_section(id):
     try:
-        s = dbserver.query.order_by(dbserver.id).first()
+        s = getActiveServer()
         p = PlexLibrary(s.ip)
         items = p.getSection(id)
         return render_template('plex/library_section.html',
@@ -131,7 +149,7 @@ def xhr_plex_section(id):
 @app.route('/xhr/plex/refresh/<int:id>/')
 def xhr_plex_refresh(id):
     try:
-        s = dbserver.query.order_by(dbserver.id).first()
+        s = getActiveServer()
         p = PlexLibrary(s.ip)
         p = p.refreshSection(id)
         return jsonify({'success': True, response: p})

@@ -3,7 +3,7 @@
 {% block content %}
 <h2>Plex {{ media['@librarySectionTitle'] }}</h2>
 <ul class="section noscroll">
-    {% if "1" not in media['@size'] %}
+    {% if media['@size']|int > 1 %}
         {% if "show" in media['@viewGroup'] %}
             {% for x in media['Directory'] %}
                 <li filter="{{x['@title']}}" data-url="{{x['@ratingKey']}}">

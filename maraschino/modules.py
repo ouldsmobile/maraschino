@@ -18,7 +18,7 @@ from Maraschino import app
 from maraschino.tools import *
 
 from maraschino.database import *
-from maraschino.models import Module, NewznabSite
+from maraschino.models import Module, NewznabSite, PlexServer
 
 # name, label, description, and static are not user-editable and are taken from here
 # poll and delay are user-editable and saved in the database - the values here are the defaults
@@ -894,6 +894,36 @@ def extra_settings_dialog(dialog_type, updated=False):
         settings=settings,
         updated=updated,
     )
+
+@app.route('/xhr/switch_server/<server_id>')
+@requires_auth
+def switch_server(server_id=None):
+    """
+    Switches Plex servers manually.
+    """
+
+    try:
+        active_server = get_setting('active_server')
+
+        if not active_server:
+            active_server = Setting('active_server', 0)
+            db_session.add(active_server)
+            db_session.commit()
+
+        if PlexServer.query.get(server_id):
+            active_server.value = server_id
+            db_session.add(active_server)
+            db_session.commit()
+            logger.log('Switched active server to ID %s' % server_id , 'INFO')
+        else:
+            logger.log('Switching server prevented, server ID %s does not exist in db' % server_id, 'INFO')
+
+    except Exception as e:
+        logger.log('Error setting active server to ID %s: %s' % (server_id, e) , 'WARNING')
+        return jsonify({ 'status': 'error' })
+
+    return jsonify({ 'status': 'success' })
+
 
 def get_module(name):
     """helper method which returns a module record from the database"""
