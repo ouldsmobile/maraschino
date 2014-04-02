@@ -8,55 +8,35 @@
         color: red;
     }
 
-    ul.plexMenu
+    ul.plexMenu li
     {
-        position: absolute;
-        right: 10px;
-        top: 10px;
-        li
+        span
         {
-            background: url('/static/images/alpha/fff_10.png');
-            cursor: pointer;
-            display: inline-block;
-            height: 30px;
-            margin-left: 4px;
-            .border-radius(4px);
-            &:hover
-            {
-                background: url('/static/images/alpha/fff_20.png');
-            }
+            background-size: 15px;
+        }
 
-            span
-            {
-                background-size: 15px;
-                background-position: center center;
-                height: 30px;
-                line-height: 30px;
-            }
-            
-            .on_deck
-            {
-                background-image: url('/static/images/on_deck.png');
-            }
-            .movie
-            {
-                background-image: url('/static/images/movies.png');
-            }
-            .show
-            {
-                background-image: url('/static/images/tv.png');
-            }
-            .photo
-            {
-                background-image: url('/static/images/picture.png');
-            }
-            .artist
-            {
-                background-image: url('/static/images/music_note.png');
-            }
+        .on_deck
+        {
+            background-image: url('/static/images/on_deck.png');
+        }
+        .movie
+        {
+            background-image: url('/static/images/movies.png');
+        }
+        .show
+        {
+            background-image: url('/static/images/tv.png');
+        }
+        .photo
+        {
+            background-image: url('/static/images/picture.png');
+        }
+        .artist
+        {
+            background-image: url('/static/images/music_note.png');
         }
     }
-    
+
     ul.onDeck
     {
         display: inline-block;
@@ -66,7 +46,7 @@
             width: 15%;
             padding: 2.5%;
             position: relative;
-            
+
             img
             {
                 width: 100%;
@@ -75,7 +55,7 @@
                     width: 98%;
                 }
             }
-            
+
             p
             {
                 position: absolute;
@@ -101,7 +81,7 @@
         overflow: hidden;
         padding: 2px;
 
-        li 
+        li
         {
             background: url('/static/images/alpha/fff_10.png');
             padding: 5px 15px;
@@ -118,6 +98,59 @@
             &:hover
             {
                 background: url('/static/images/alpha/fff_20.png');
+            }
+        }
+    }
+    div.actions
+    {
+        padding: 3px;
+        width: 97%;
+        line-height: 28px;
+        input
+        {
+            background: url('/static/images/alpha/fff_10.png');
+            border: 1px solid #222;
+            cursor: pointer;
+            color: #67c0f8;
+            height: 28px;
+            width: 50%;
+            .border-radius(4px);
+        }
+        ul
+        {
+            display: inline;
+            float: right;
+            li
+            {
+                background: url('/static/images/alpha/fff_10.png');
+                cursor: pointer;
+                float: right;
+                display: inline-block;
+                height: 30px;
+                width: 30px;
+                margin-left: 4px;
+                text-indent: -9999px;
+                .border-radius(4px);
+                &:hover
+                {
+                    background: url('/static/images/alpha/fff_20.png');
+                }
+
+                span
+                {
+                    background-position: center center;
+                    background-repeat: no-repeat;
+                    display: block;
+                    height: 30px;
+                    line-height: 30px;
+                    text-align: center;
+                    width: 30px;
+                }
+
+                &.refresh span
+                {
+                    background-image: url('/static/images/refresh.png');
+                }
             }
         }
     }

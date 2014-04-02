@@ -6,7 +6,7 @@
     {% if "1" not in media['@size'] %}
         {% if "show" in media['@viewGroup'] %}
             {% for x in media['Directory'] %}
-                <li data-url="{{x['@ratingKey']}}">
+                <li filter="{{x['@title']}}" data-url="{{x['@ratingKey']}}">
                     <a href="http://plex.tv/web/app#!/server/{{id}}/details/{{x['@key']|replace('/', '%2F')|replace('children', '')}}" target="_blank">
                         <p>{{ x['@title'] }}</p>
                     </a>
@@ -14,7 +14,7 @@
             {% endfor %}
         {% elif "movie" in media['@viewGroup'] %}
             {% for x in media['Video'] %}
-                <li data-url="{{x['@key']}}">
+                <li filter="{{x['@title']}}" data-url="{{x['@key']}}">
                     <a href="http://plex.tv/web/app#!/server/{{id}}/details/{{x['@key']|replace('/', '%2F')}}" target="_blank">
                         <p>{{x['@title']}} ({{x['@year']}}) </p>
                     </a>
@@ -22,7 +22,7 @@
             {% endfor %}
         {% elif "artist" in media['@viewGroup'] %}
             {% for x in media['Directory'] %}
-                <li data-url="{{x['@key']}}">
+                <li filter="{{x['@title'] }}" data-url="{{x['@key']}}">
                     <a href="http://plex.tv/web/app#!/server/{{id}}/details/{{x['@key']|replace('/', '%2F')}}" target="_blank">
                         <p>{{x['@title']}} </p>
                     </a>
@@ -30,7 +30,7 @@
             {% endfor %}
         {% else %}
             {% for x in media['Photo'] %}
-                <li data-url="{{x['@key']}}">
+                <li filter="{{x['@title']}}" data-url="{{x['@key']}}">
                     <a href="http://plex.tv/web/app#!/server/{{id}}/details/{{x['@key']|replace('/', '%2F')}}" target="_blank">
                         <p>{{x['@title']}} </p>
                     </a>
@@ -39,25 +39,25 @@
         {% endif %}
     {% else %}
         {% if "show" in media['@viewGroup'] %}
-            <li data-url="{{media['Directory']['@ratingKey']}}">
+            <li filter="{{media['Directory']['@title']}}" data-url="{{media['Directory']['@ratingKey']}}">
                 <a href="http://plex.tv/web/app#!/server/{{id}}/details/{{media['Directory']['@key']|replace('/', '%2F')|replace('children', '')}}" target="_blank">
                     <p>{{ media['Directory']['@title'] }}</p>
                 </a>
             </li>
         {% elif "movie" in media['@viewGroup'] %}
-            <li data-url="{{media['Video']['@key']}}">
+            <li filter="{{media['Video']['@title']}}" data-url="{{media['Video']['@key']}}">
                 <a href="http://plex.tv/web/app#!/server/{{id}}/details/{{media['Video']['@key']|replace('/', '%2F')}}" target="_blank">
                     <p>{{media['Video']['@title']}} ({{media['Video']['@year']}}) </p>
                 </a>
             </li>
         {% elif "artist" in media['@viewGroup'] %}
-            <li data-url="{{media['Directory']['@key']}}">
+            <li filter="{{media['Directory']['@title']}}" data-url="{{media['Directory']['@key']}}">
                 <a href="http://plex.tv/web/app#!/server/{{id}}/details/{{media['Directory']['@key']|replace('/', '%2F')}}" target="_blank">
                     <p>{{media['Directory']['@title']}} </p>
                 </a>
             </li>
         {% else %}
-            <li data-url="{{media['Photo']['@key']}}">
+            <li filter="{{media['Photo']['@title']}}" data-url="{{media['Photo']['@key']}}">
                 <a href="http://plex.tv/web/app#!/server/{{id}}/details/{{media['Photo']['@key']|replace('/', '%2F')}}" target="_blank">
                     <p>{{media['Photo']['@title']}} </p>
                 </a>
@@ -65,4 +65,12 @@
         {% endif %}
     {% endif %}
 </ul>
+<div class="actions">
+    <input type="text" class="filter" placeholder="Filter {{media['@librarySectionTitle']}}">
+    <ul>
+        <li class="refresh" data-id="{{media['@librarySectionID']}}" title="Refresh {{media['@librarySectionTitle']}} ">
+            <span>Refresh Library</span>
+        </li>
+    </ul>
+</div>
 {% endblock %}

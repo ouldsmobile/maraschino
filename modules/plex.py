@@ -1,10 +1,9 @@
-from flask import render_template
+from flask import render_template, jsonify
 from maraschino import app, logger
-from maraschino.tools import get_setting_value, requires_auth
+from maraschino.tools import requires_auth
 from maraschino.models import PlexServer as dbserver
 
-from plexLib import PlexLibrary, PlexServer
-from xmltodict import xmltodict
+from plexLib import PlexLibrary
 
 
 def safeAddress(ip, port=32400):
@@ -35,7 +34,7 @@ def plexListSection(id):
 
         return 'Check terminal'
     except Exception, e:
-        raise e    
+        raise e
 
 
 @app.route('/xhr/plex/updateSections/<int:id>/')
@@ -50,7 +49,7 @@ def plexUpdateSections(id):
         for section in sections['MediaContainer']['Directory']:
             db_section.update(
                 {
-                    section['@uuid']: 
+                    section['@uuid']:
                     {
                         'key': section['@key'],
                         'type': section['@type'],
@@ -127,3 +126,15 @@ def xhr_plex_section(id):
         )
     except Exception as e:
         return error(e)
+
+
+@app.route('/xhr/plex/refresh/<int:id>/')
+def xhr_plex_refresh(id):
+    try:
+        s = dbserver.query.order_by(dbserver.id).first()
+        p = PlexLibrary(s.ip)
+        p = p.refreshSection(id)
+        return jsonify({'success': True, response: p})
+    except:
+        return jsonify({'success': False})
+

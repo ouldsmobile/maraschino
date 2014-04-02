@@ -209,7 +209,7 @@ $(document).ready(function() {
     );
     request.error(function(jqXHR, textStatus, errorThrown){
       popup_message('Could not save myPlex info: ' + errorThrown);
-    })
+    });
   });
 
   $(document).on('click', 'div#plex.module .plexMenu li', function(){
@@ -219,6 +219,35 @@ $(document).ready(function() {
       $('div#plex.module').replaceWith($(data));
     });
   });
+
+  $(document).on('click', 'div#plex div.actions ul li.refresh', function() {
+    event.preventDefault();
+    el = $(this);
+    css_loading_gif(el);
+    var request = $.get(WEBROOT + '/xhr/plex/refresh/' + $(this).data('id'));
+    request.error(function() {
+      css_error_image(el);
+    });
+    request.success(function() {
+      css_success_image(el);
+    });
+  });
+
+  $(document).on('change keydown keyup search', '#plex .filter', function(e){
+    var filter = $(this).val().toLowerCase();
+    $('#plex .section li').filter(function(index) {
+      console.log($(this));
+      return $(this).attr('filter').toLowerCase().indexOf(filter) < 0;
+    }).css('display', 'none');
+    $('#plex .section li').filter(function(index) {
+      return $(this).attr('filter').toLowerCase().indexOf(filter) >= 0;
+    }).css('display', '');
+    if(e.which == 13){
+      $('#plex .section li:visible:first').click();
+    }
+  });
+
+
   /*** END PLEX ***/
 
   /*** SICKBEARD ***/
@@ -1662,10 +1691,21 @@ $(document).ready(function() {
     $(element).append('<img src="' + WEBROOT + '/static/images/xhrloading.gif" class="xhrloading" width="18" height="15" alt="Loading...">');
   }
 
+  function css_loading_gif(element) {
+    $(element).children().css('background', 'url('+WEBROOT+'/static/images/xhrloading.gif) no-repeat center').html('&nbsp;');
+  }
+
   function remove_loading_gif(element) {
     $(element).find('.xhrloading').remove();
   }
 
+  function css_error_image(element) {
+    $(element).children().css('background', 'url('+WEBROOT+'/static/images/no.png) no-repeat center').html('&nbsp;');
+  }
+
+  function css_success_image(element) {
+    $(element).children().css('background', 'url('+WEBROOT+'/static/images/yes.png) no-repeat center').html('&nbsp;');
+  }
   // generic expand truncated text
 
   $(document).on('click', '.expand', function() {
