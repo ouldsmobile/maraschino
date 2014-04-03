@@ -7,19 +7,13 @@
         <li data-url="{{x['@key']}}">
             {% if "episode" in x['@type'] %}
                 <a href="http://plex.tv/web/app#!/server/{{id}}/details/{{x['@key']|replace('/', '%2F')}}" target="_blank">
-                    <img src="{{address}}{{x['@grandparentThumb']}}">
+                    <img src="/xhr/plex/img{{x['@grandparentThumb']}}">
                     <p>{{x['@parentIndex']}}x{{x['@index']}}
                 </a>
             {% elif "movie" in x['@type'] %}
                 <a href="http://plex.tv/web/app#!/server/{{id}}/details/{{x['@key']|replace('/', '%2F')}}" target="_blank">
-                    <img 
-                    src="
-                    {% if x['@thumb'] %}
-                        {{address}}{{x['@thumb']}}
-                    {% else %}
-                        {{ url_for('static', filename='images/poster.png') }}
-                    {% endif %}" 
-                    class="movie">
+                    <img
+                    src="/xhr/plex/img{{ x['@thumb'] }}" class="movie">
                 </a>
             {% endif %}
         </li>

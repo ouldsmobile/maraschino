@@ -2,9 +2,8 @@ from flask import render_template, jsonify
 from maraschino import app, logger
 from maraschino.tools import requires_auth, get_setting_value
 from maraschino.models import PlexServer as dbserver
-
 from plexLib import PlexLibrary
-
+import base64
 
 def safeAddress(ip, port=32400):
     return "http://%s:%s" % (ip, port)
@@ -152,7 +151,33 @@ def xhr_plex_refresh(id):
         s = getActiveServer()
         p = PlexLibrary(s.ip)
         p = p.refreshSection(id)
-        return jsonify({'success': True, response: p})
+        return jsonify({'success': True, 'response': p})
     except:
         return jsonify({'success': False})
+
+
+@app.route('/xhr/plex/img/')
+@app.route('/xhr/plex/img/<path:path>/')
+@requires_auth
+def xhr_plex_image(path=""):
+    if path is '':
+        img = RUNDIR + 'static/images/applications/Plex.png'
+        return send_file(img, mimetype='image/jpeg')
+
+    server = getActiveServer()
+
+    url = 'http://%s:32400/%s' % (server.ip, path)
+
+    username = get_setting_value('myPlex_username')
+    password = get_setting_value('myPlex_password')
+    try:
+        request = urllib2.Request(url)
+        base64string = base64.encodestring('%s:%s' % (username, password)).replace('\n', '')
+        request.add_header("Authorization", "Basic %s" % base64string)
+
+        img = StringIO.StringIO(urllib2.urlopen(request).read())
+        return send_file(img, mimetype='image/jpeg')
+    except:
+        img = RUNDIR + 'static/images/applications/Plex.png'
+        return send_file(img, mimetype='image/jpeg')
 
