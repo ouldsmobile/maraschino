@@ -1,9 +1,10 @@
-from flask import render_template, jsonify
-from maraschino import app, logger
+from flask import render_template, jsonify, send_file
+from maraschino import app, logger, RUNDIR
 from maraschino.tools import requires_auth, get_setting_value
 from maraschino.models import PlexServer as dbserver
 from plexLib import PlexLibrary
-import base64
+import base64, urllib2, StringIO
+
 
 def safeAddress(ip, port=32400):
     return "http://%s:%s" % (ip, port)
@@ -159,7 +160,7 @@ def xhr_plex_refresh(id):
 @app.route('/xhr/plex/img/')
 @app.route('/xhr/plex/img/<path:path>/')
 @requires_auth
-def xhr_plex_image(path=""):
+def xhr_plex_image(path=''):
     if path is '':
         img = RUNDIR + 'static/images/applications/Plex.png'
         return send_file(img, mimetype='image/jpeg')
