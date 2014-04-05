@@ -215,7 +215,15 @@ AVAILABLE_MODULES = [
         'static': False,
         'poll': 360,
         'delay': 0,
-   },
+    },
+    {
+        'name': 'plex_recent_episodes',
+        'label': 'Plex - Recently Added Episodes',
+        'description': 'See the latest Episodes in your Plex Library',
+        'static': False,
+        'poll': 360,
+        'delay': 0,
+    },
     {
         'name': 'nzbget',
         'label': 'Usenet - NZBGet',

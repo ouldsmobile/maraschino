@@ -1,4 +1,5 @@
-#plex_recent_movies
+#plex_recent_movies,
+#plex_recent_episodes
 {
     ul
     {
@@ -16,6 +17,7 @@
             border: 1px solid #222;
             margin-top: 5px;
             line-height: 1.3em;
+            min-height: 60px;
             .border-radius(4px);
 
             &:hover
@@ -23,15 +25,24 @@
                 background: url('/static/images/alpha/fff_20.png');
             }
 
+            p
+            {
+                white-space: nowrap;
+                text-overflow: ellipsis;
+                overflow: hidden;
+            }
+
             a
             {
                 color: white;
             }
+
             img
             {
                 height: 60px;
                 float: right;
             }
+
             small
             {
                 font-size: 0.8em;
