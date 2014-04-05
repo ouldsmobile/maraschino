@@ -1,0 +1,42 @@
+#plex_recent_movies
+{
+    ul
+    {
+        max-height: 500px;
+        overflow-y: auto;
+        cursor: pointer;
+        width: 99%;
+        overflow: hidden;
+        padding: 2px;
+
+        li
+        {
+            background: url('/static/images/alpha/fff_10.png');
+            padding: 5px 15px;
+            border: 1px solid #222;
+            margin-top: 5px;
+            line-height: 1.3em;
+            .border-radius(4px);
+
+            &:hover
+            {
+                background: url('/static/images/alpha/fff_20.png');
+            }
+
+            a
+            {
+                color: white;
+            }
+            img
+            {
+                height: 60px;
+                float: right;
+            }
+            small
+            {
+                font-size: 0.8em;
+            }
+        }
+    }
+
+}

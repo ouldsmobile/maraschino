@@ -116,18 +116,30 @@ def xhr_on_deck():
         return error(e)
 
 
-@app.route('/xhr/plex/recentlyAdded/')
+@app.route('/xhr/plex_recent_movies/')
 def xhr_recently_added():
     try:
         s = getActiveServer()
         p = PlexLibrary(s.ip)
-        recentlyAdded = p.recentlyAdded()
-        return render_template('plex/recently_added.html',
+        query = None
+        for section in s.sections:
+            if 'movie' in s.sections[section]['type']:
+                query=s.sections[section]['key']
+
+        recentlyAdded = p.recentlyAdded(section=query, params="X-Plex-Container-Start=0&X-Plex-Container-Size=5")
+
+        for movie in recentlyAdded['MediaContainer']['Video']:
+            try:
+                movie['@rating'] = round(float(movie['@rating']), 1)
+            except:
+                pass
+
+        return render_template('plex/recentMovies.html',
             server=s,
-            video=recentlyAdded['MediaContainer'],
-            address=safeAddress(s.ip),
+            movies=recentlyAdded['MediaContainer'],
         )
     except Exception as e:
+        print e
         return error(e)
 
 

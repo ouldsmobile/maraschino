@@ -10,8 +10,12 @@ class PlexLibrary(object):
         return self.s.query('library/onDeck')
 
 
-    def recentlyAdded(self):
-        return self.s.query('library/recentlyAdded')
+    def recentlyAdded(self, section=None, params=""):
+        if section:
+            print params
+            return self.s.query('library/sections/%s/recentlyAdded?%s' % (section, params))
+
+        return self.s.query('library/recentlyAdded?%s' %params)
 
 
     def sections(self):

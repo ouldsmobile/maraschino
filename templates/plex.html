@@ -1,13 +1,15 @@
+{% if server %}
+
 <div id="plex" class="module generic" data-module="plex">
 
     <div class="module_settings"><span>Settings</span></div>
     <div class="module_remove"><span>Remove</span></div>
     {% if error %}
-        <div class="error">        
+        <div class="error">
             <h2>Plex ERROR</h2>
             <p>Problem reaching Plex</p>
             <p>{{ exception }}</p>
-        </div>    
+        </div>
     {% else %}
         {% set id = server.machineIdentifier %}
         <ul class="menu plexMenu">
@@ -16,7 +18,7 @@
             </li>
             {% for s in server.sections %}
                 {% set section = server.sections[s] %}
-                <li data-key="section/{{section['key']}}" title="section['title']"> 
+                <li data-key="section/{{section['key']}}" title="section['title']">
                     <span class="{{section['type']}}">{{ section['title'] }} </span>
                 </li>
             {% endfor %}
@@ -26,3 +28,13 @@
 
     {%endif%}
 </div>
+
+{% else %}
+
+<div class="placeholder" data-module="plex">
+  <div class="module_settings"><span>Settings</span></div>
+  <div class="module_remove"><span>Remove</span></div>
+  <h2>Plex</h2>
+</div>
+
+{% endif %}

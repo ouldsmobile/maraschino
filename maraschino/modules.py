@@ -192,7 +192,7 @@ AVAILABLE_MODULES = [
         'name': 'plex',
         'label': 'Plex Module',
         'description': 'Check your Plex Server content - OnDeck and Library',
-        'static': False,
+        'static': True,
         'poll': 0,
         'delay': 0,
         'settings': [
@@ -208,6 +208,14 @@ AVAILABLE_MODULES = [
             },
         ]
     },
+    {
+        'name': 'plex_recent_movies',
+        'label': 'Plex - Recently Added Movies',
+        'description': 'See the latest Movies in your Plex Library',
+        'static': False,
+        'poll': 360,
+        'delay': 0,
+   },
     {
         'name': 'nzbget',
         'label': 'Usenet - NZBGet',

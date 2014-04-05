@@ -1,0 +1,22 @@
+<div id="plex_recent_movies" class="module generic" data-module="plex_recent_movies">
+
+    <div class="module_settings"><span>Settings</span></div>
+    <div class="module_remove"><span>Remove</span></div>
+    {% set id = server.machineIdentifier %}
+
+    <h2>Recently Added Movies</h2>
+    <ul>
+    {% for movie in movies['Video'] %}
+        <li>
+            <a href="http://plex.tv/web/app#!/server/{{id}}/details/{{movie['@key']|replace('/', '%2F')}}" target="_blank">
+                <img src="/xhr/plex/img{{ movie['@thumb'] }}">
+                <p>
+                    <b>{{ movie['@title'] }}</b> <br>
+                    <small>Year: {{ movie['@year'] }}</small> <br>
+                    {% if movie['@rating'] %}<small>Rating: {{ movie['@rating'] }}</small>{% endif %}
+                </p>
+            </a>
+        </li>
+    {% endfor %}
+    </ul>
+</div>
