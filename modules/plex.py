@@ -117,7 +117,7 @@ def xhr_on_deck():
 
 
 @app.route('/xhr/plex_recent_movies/')
-def xhr_recently_movies():
+def xhr_recent_movies():
     try:
         s = getActiveServer()
         p = PlexLibrary(s.ip)
@@ -144,7 +144,7 @@ def xhr_recently_movies():
 
 
 @app.route('/xhr/plex_recent_episodes/')
-def xhr_recently_episodes():
+def xhr_recent_episodes():
     try:
         s = getActiveServer()
         p = PlexLibrary(s.ip)
@@ -152,13 +152,58 @@ def xhr_recently_episodes():
         for section in s.sections:
             if 'show' in s.sections[section]['type']:
                 query=s.sections[section]['key']
+                break
 
         recentlyAdded = p.recentlyAdded(section=query, params="X-Plex-Container-Start=0&X-Plex-Container-Size=5")
 
         return render_template('plex/recent.html',
             title='episodes',
             server=s,
-            movies=recentlyAdded['MediaContainer'],
+            episodes=recentlyAdded['MediaContainer'],
+        )
+    except Exception as e:
+        return error(e)
+
+
+@app.route('/xhr/plex_recent_albums/')
+def xhr_recent_albums():
+    try:
+        s = getActiveServer()
+        p = PlexLibrary(s.ip)
+        query = None
+        for section in s.sections:
+            if 'artist' in s.sections[section]['type']:
+                query=s.sections[section]['key']
+                break
+
+        recentlyAdded = p.recentlyAdded(section=query, params="X-Plex-Container-Start=0&X-Plex-Container-Size=5")
+
+        return render_template('plex/recent.html',
+            title='albums',
+            server=s,
+            albums=recentlyAdded['MediaContainer'],
+        )
+    except Exception as e:
+        return error(e)
+
+
+@app.route('/xhr/plex_recent_photos/')
+def xhr_recent_photos():
+    try:
+        s = getActiveServer()
+        p = PlexLibrary(s.ip)
+        query = None
+        for section in s.sections:
+            if 'photo' in s.sections[section]['type']:
+                query=s.sections[section]['key']
+                break
+
+        recentlyAdded = p.recentlyAdded(section=query, params="X-Plex-Container-Start=0&X-Plex-Container-Size=5")
+
+        return render_template('plex/recent.html',
+            title='photos',
+            server=s,
+            photos=recentlyAdded['MediaContainer'],
         )
     except Exception as e:
         return error(e)

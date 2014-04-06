@@ -6,24 +6,58 @@
 
     <h2>Recently Added {{title|capitalize}}</h2>
     <ul>
-    {% for movie in movies['Video'] %}
-        <li>
-            <a href="http://plex.tv/web/app#!/server/{{id}}/details/{{movie['@key']|replace('/', '%2F')}}" target="_blank">
-                <img src="/xhr/plex/img{{ movie['@thumb'] }}">
-                <p>
-                    {% if 'movies' in title %}
+    {% if 'movies' in title %}
+        {% for movie in movies['Video'] %}
+            <li>
+                <a href="http://plex.tv/web/app#!/server/{{id}}/details/{{movie['@key']|replace('/', '%2F')}}" target="_blank">
+                    <img src="/xhr/plex/img{{ movie['@thumb'] }}">
+                    <p>
                         <b>{{ movie['@title'] }}</b> <br>
                         <small>Year: {{ movie['@year'] }}</small> <br>
                         {% if movie['@rating'] %}<small>Rating: {{ movie['@rating'] }}</small>{% endif %}
-                    {% else %}
-                        <b>{{movie['@grandparentTitle']}}</b> <br>
-                        <small>Season {{movie['@parentIndex']}}, Episode {{movie['@index']}}</small><br>
-                        <small>{{ movie['@title'] }}</small>
-                    {%endif%}
-
-                </p>
-            </a>
-        </li>
-    {% endfor %}
+                    </p>
+                </a>
+            </li>
+        {% endfor %}
+    {% elif 'episodes' in title %}
+        {% for episode in episodes['Video'] %}
+            <li>
+                <a href="http://plex.tv/web/app#!/server/{{id}}/details/{{episode['@key']|replace('/', '%2F')}}" target="_blank">
+                    <img src="/xhr/plex/img{{ episode['@thumb'] }}">
+                    <p>
+                        <b>{{episode['@grandparentTitle']}}</b> <br>
+                        <small>Season {{episode['@parentIndex']}}, Episode {{episode['@index']}}</small><br>
+                        <small>{{ episode['@title'] }}</small>
+                    </p>
+                </a>
+            </li>
+        {% endfor %}
+    {% elif 'albums' in title %}
+        {% for album in albums['Directory'] %}
+            <li>
+                <a href="http://plex.tv/web/app#!/server/{{id}}/details/{{album['@key']|replace('/', '%2F')}}" target="_blank">
+                    <img src="/xhr/plex/img{{ album['@thumb'] }}">
+                    <p>
+                        <b>{{ album['@title'] }}</b> <br>
+                        <small>By: {{album['@parentTitle']}}</small><br>
+                        <small>Year: {{album['@year']}}</small>
+                    </p>
+                </a>
+            </li>
+        {% endfor %}
+    {% else %}
+        {% for photo in photos['Photo'] %}
+            <li>
+                <a href="http://plex.tv/web/app#!/server/{{id}}/details/{{photo['@key']|replace('/', '%2F')}}" target="_blank">
+                    <img src="/xhr/plex/img{{ photo['@thumb'] }}">
+                    <p>
+                        <b>{{ photo['@title'] }}</b> <br>
+                        <small>Year: {{photo['@year']}}</small><br>
+                        <small>{{photo['@summary']}}</small><br>
+                    </p>
+                </a>
+            </li>
+        {% endfor %}
+    {%endif%}
     </ul>
 </div>

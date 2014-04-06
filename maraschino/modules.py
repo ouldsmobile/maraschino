@@ -211,7 +211,7 @@ AVAILABLE_MODULES = [
     {
         'name': 'plex_recent_movies',
         'label': 'Plex - Recently Added Movies',
-        'description': 'See the latest Movies in your Plex Library',
+        'description': 'See the latest Movies from your Plex Library',
         'static': False,
         'poll': 360,
         'delay': 0,
@@ -219,7 +219,23 @@ AVAILABLE_MODULES = [
     {
         'name': 'plex_recent_episodes',
         'label': 'Plex - Recently Added Episodes',
-        'description': 'See the latest Episodes in your Plex Library',
+        'description': 'See the latest Episodes from your Plex Library',
+        'static': False,
+        'poll': 360,
+        'delay': 0,
+    },
+    {
+        'name': 'plex_recent_albums',
+        'label': 'Plex - Recently Added Albums',
+        'description': 'See the latest Albums from your Plex Library',
+        'static': False,
+        'poll': 360,
+        'delay': 0,
+    },
+    {
+        'name': 'plex_recent_photos',
+        'label': 'Plex - Recently Added Photos',
+        'description': 'See the latest Photos from your Plex Library',
         'static': False,
         'poll': 360,
         'delay': 0,

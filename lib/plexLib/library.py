@@ -12,7 +12,6 @@ class PlexLibrary(object):
 
     def recentlyAdded(self, section=None, params=""):
         if section:
-            print params
             return self.s.query('library/sections/%s/recentlyAdded?%s' % (section, params))
 
         return self.s.query('library/recentlyAdded?%s' %params)
