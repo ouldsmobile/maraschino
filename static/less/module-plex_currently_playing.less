@@ -1,0 +1,64 @@
+#currently_playing
+{
+  background: url('/@{webroot}/images/alpha/000_80.png');
+  bottom: 0;
+  left: 0;
+  min-width: 900px;
+  padding: 20px;
+  position: fixed;
+  right: 0;
+  z-index: 9999;
+  height: 40px;
+  .box-shadow(#222, 0, 0, 10px);
+
+  div.player
+  {
+    position: relative;
+    overflow: hidden;
+    float: left;
+    margin: 0px 10px;
+
+    &.episode
+    {
+      height: 100px;
+      bottom: 50px;
+    }
+
+    &.movie
+    {
+      height: 180px;
+      bottom: 130px;
+    }
+    img
+    {
+      max-height: 100%;
+      max-width: 100%;
+    }
+
+    div.info
+    {
+      position: absolute;
+      background: url('/@{webroot}/images/alpha/000_40.png');
+      top: 0;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      text-align: center;
+      padding: 10px;
+      span
+      {
+        font-size: 0.5em;
+        display: block;
+        overflow: hidden;
+        white-space: nowrap;
+      }
+      span.user
+      {
+        bottom: 5px;
+        position: absolute;
+        left: 0;
+        right: 0;
+      }
+    }
+  }
+}

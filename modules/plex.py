@@ -260,3 +260,21 @@ def xhr_plex_image(path=''):
         img = RUNDIR + 'static/images/applications/Plex.png'
         return send_file(img, mimetype='image/jpeg')
 
+
+@app.route('/xhr/plex/now_playing/')
+def xhr_plex_now_playing():
+    try:
+        s = getActiveServer()
+        p = PlexLibrary(s.ip)
+        clients = p.nowPlaying()
+        if int(clients['MediaContainer']['@size']) == 0:
+            return jsonify({ 'playing': False })
+
+        return render_template('plex/now_playing.html',
+            server=s,
+            clients=clients['MediaContainer'],
+        )
+    except Exception as e:
+        return error(e)
+
+

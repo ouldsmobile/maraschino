@@ -140,6 +140,41 @@ $(document).ready(function() {
 
   init_modules();
 
+  // currently playing
+
+  var currently_playing = setTimeout(function() {
+      get_currently_playing();
+    }, 5000
+  );
+
+  function get_currently_playing() {
+    $.get(WEBROOT + '/xhr/plex/now_playing', function(data) {
+      if (data.playing === false) {
+
+        // hide currently playing
+        $('#currently_playing').slideUp(200, function() {
+          $(this).remove();
+        });
+
+        currently_playing_id = null;
+
+      } else {
+        var currently_playing_module = $('#currently_playing');
+
+        if (currently_playing_module.length > 0) {
+          currently_playing_module.replaceWith(data);
+
+        } else {
+          module = $(data).hide();
+          $('body').append(module);
+          $('#currently_playing').slideDown(200);
+        }
+      }
+      currently_playing = setTimeout(function() { get_currently_playing(); }, 5000 );
+    });
+  }
+
+
   // post trakt shout
 
   $(document).on('click', '#add_shout .submit', function() {

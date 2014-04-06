@@ -27,3 +27,7 @@ class PlexLibrary(object):
 
     def refreshSection(self, id):
         return self.s.query('library/section/%s/refresh' % id)
+
+
+    def nowPlaying(self):
+        return self.s.query('status/sessions')

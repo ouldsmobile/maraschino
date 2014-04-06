@@ -1,0 +1,22 @@
+{% macro video(item) -%}
+  <div class="player {{item['@type']}}" title="@{{item['Player']['@title']}}">
+    <img src="/xhr/plex/img{{item['@thumb']}}" style="float:left;">
+    <div class="info">
+      {% if 'episode' in item['@type'] %}
+        <span>{{ item['@grandparentTitle'] }} - {{item['@parentIndex']}}x{{item['@index']}}</span>
+      {% else %}
+        <span>{{ item['@title'] }}</span>
+        <span>({{item['@year']}})</span>
+      {% endif %}
+      <span class="user">{{ item['User']['@title'] }}</span>
+    </div>
+  </div>
+{%- endmacro %}
+
+<div id="currently_playing">
+  {% if clients['@size']|int == 1 %}
+    {% if clients['Video'] %} {{ video(clients['Video']) }} {% endif %}
+  {% else %}
+    {% for client in clients['Video'] %}{{ video(client) }}{% endfor %}
+  {% endif %}
+</div>
