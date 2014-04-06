@@ -1,6 +1,6 @@
 {% macro video(item) -%}
   <div class="player {{item['@type']}}" title="@{{item['Player']['@title']}}">
-    <img src="/xhr/plex/img{{item['@thumb']}}" style="float:left;">
+    <img src="/xhr/plex/img{{item['@thumb']}}">
     <div class="info">
       {% if 'episode' in item['@type'] %}
         <span>{{ item['@grandparentTitle'] }} - {{item['@parentIndex']}}x{{item['@index']}}</span>
@@ -12,11 +12,55 @@
     </div>
   </div>
 {%- endmacro %}
+{% macro song(item) -%}
+  <div class="player {{item['@type']}}" title="@{{item['Player']['@title']}}">
+    <img src="/xhr/plex/img{{item['@thumb']}}">
+    <div class="info">
+      <span>{{ item['@title'] }}</span>
+      <span>{{ item['@grandparentTitle'] }}</span>
+      <span>{{ item['@parentTitle'] }}</span>
+      <span>Track {{ item['@index'] }}</span>
+      <span class="user">{{ item['User']['@title'] }}</span>
+    </div>
+  </div>
+{%- endmacro %}
+{% macro photo(item) -%}
+  <div class="player {{item['@type']}}" title="@{{item['Player']['@title']}}">
+    <img src="/xhr/plex/img{{item['@thumb']}}">
+    <div class="info">
+      <span>{{ item['@title'] }}</span>
+      <span>{{ item['@year'] }}</span>
+      <span class="user">{{ item['User']['@title'] }}</span>
+    </div>
+  </div>
+{%- endmacro %}
 
 <div id="currently_playing">
-  {% if clients['@size']|int == 1 %}
-    {% if clients['Video'] %} {{ video(clients['Video']) }} {% endif %}
-  {% else %}
-    {% for client in clients['Video'] %}{{ video(client) }}{% endfor %}
+  {% if videos %}
+    {% if videos['@type'] %}
+      {{ video(videos) }}
+    {% else %}
+      {% for item in videos %}
+        {{ video(item) }}
+      {% endfor %}
+    {% endif %}
+  {% endif %}
+  {% if songs %}
+    {% if songs['@type'] %}
+      {{ song(songs) }}
+    {% else %}
+      {% for item in songs %}
+        {{ song(item) }}
+      {% endfor %}
+    {% endif %}
+  {% endif %}
+  {% if photos %}
+    {% if photos['@type'] %}
+      {{ photo(photos) }}
+    {% else %}
+      {% for item in photos %}
+        {{ photo(item) }}
+      {% endfor %}
+    {% endif %}
   {% endif %}
 </div>

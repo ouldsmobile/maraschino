@@ -270,9 +270,29 @@ def xhr_plex_now_playing():
         if int(clients['MediaContainer']['@size']) == 0:
             return jsonify({ 'playing': False })
 
+        videos = None
+        songs = None
+        photos = None
+        try:
+            videos = clients['MediaContainer']['Video']
+        except:
+            pass
+
+        try:
+            songs = clients['MediaContainer']['Track']
+        except:
+            pass
+
+        try:
+            photos = clients['MediaContainer']['Photo']
+        except:
+            pass
+
         return render_template('plex/now_playing.html',
             server=s,
-            clients=clients['MediaContainer'],
+            videos=videos,
+            songs=songs,
+            photos=photos,
         )
     except Exception as e:
         return error(e)
