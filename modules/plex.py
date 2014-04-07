@@ -65,6 +65,9 @@ def plexUpdateSections(id):
         p = PlexLibrary(plex.ip)
         sections = p.sections()
         for section in sections['MediaContainer']['Directory']:
+            if 'video' in section['@thumb']:
+                section['@type'] = 'home'
+
             db_section.update(
                 {
                     section['@uuid']:
@@ -125,6 +128,7 @@ def xhr_recent_movies():
         for section in s.sections:
             if 'movie' in s.sections[section]['type']:
                 query=s.sections[section]['key']
+                break
 
         recentlyAdded = p.recentlyAdded(section=query, params="X-Plex-Container-Start=0&X-Plex-Container-Size=5")
 
