@@ -1,0 +1,10 @@
+{% extends "plex.html" %}
+
+{% block content %}
+<h2>{{sections['label']|capitalize}} Sections</h2>
+<ul class="section noscroll list">
+    {% for index in sections['sections'] %}
+        <li data-key="section/{{ sections['sections'][index]['key'] }}">{{sections['sections'][index]['title']}}</li>
+    {% endfor %}
+</ul>
+{% endblock %}

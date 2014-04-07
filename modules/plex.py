@@ -59,25 +59,33 @@ def plexListSection(id):
 @requires_auth
 def plexUpdateSections(id):
     from maraschino.database import db_session
-    db_section = {}
+    db_section = {
+        'movie': {'size': 0, 'sections': {}, 'label': 'movie'},
+        'home': {'size': 0, 'sections': {}, 'label': 'home'},
+        'photo': {'size': 0, 'sections': {}, 'label': 'photo'},
+        'artist': {'size': 0, 'sections': {}, 'label': 'artist'},
+        'show': {'size': 0, 'sections': {}, 'label': 'show'},
+    }
     try:
         plex = dbserver.query.filter(dbserver.id == id).first()
         p = PlexLibrary(plex.ip)
         sections = p.sections()
         for section in sections['MediaContainer']['Directory']:
             if 'video' in section['@thumb']:
-                section['@type'] = 'home'
+                section['@type'] = u'home'
 
-            db_section.update(
+            db_section[section['@type']]['sections'].update(
                 {
-                    section['@uuid']:
+                    db_section[section['@type']]['size']:
                     {
                         'key': section['@key'],
                         'type': section['@type'],
-                        'title': section['@title']
+                        'title': section['@title'],
+                        'uuid': section['@uuid']
                     }
                 }
             )
+            db_section[section['@type']]['size'] += 1
         plex.sections = db_section
         db_session.add(plex)
         db_session.commit()
@@ -94,8 +102,7 @@ def plex():
     try:
         s = getActiveServer()
         if s is not None:
-            if not s.sections:
-                plexUpdateSections(id=s.id)
+            plexUpdateSections(id=s.id)
 
             return xhr_on_deck()
         else:
@@ -110,6 +117,7 @@ def xhr_on_deck():
         s = getActiveServer()
         p = PlexLibrary(s.ip)
         onDeck = p.onDeck()
+
         return render_template('plex/on_deck.html',
             server=s,
             video=onDeck['MediaContainer'],
@@ -126,8 +134,8 @@ def xhr_recent_movies():
         p = PlexLibrary(s.ip)
         query = None
         for section in s.sections:
-            if 'movie' in s.sections[section]['type']:
-                query=s.sections[section]['key']
+            if 'movie' in section:
+                query=s.sections[section]['sections'][0]['key']
                 break
 
         recentlyAdded = p.recentlyAdded(section=query, params="X-Plex-Container-Start=0&X-Plex-Container-Size=5")
@@ -144,6 +152,7 @@ def xhr_recent_movies():
             movies=recentlyAdded['MediaContainer'],
         )
     except Exception as e:
+        plex_log(e, 'ERROR')
         return error(e)
 
 
@@ -154,8 +163,8 @@ def xhr_recent_episodes():
         p = PlexLibrary(s.ip)
         query = None
         for section in s.sections:
-            if 'show' in s.sections[section]['type']:
-                query=s.sections[section]['key']
+            if 'show' in section:
+                query=s.sections[section]['sections'][0]['key']
                 break
 
         recentlyAdded = p.recentlyAdded(section=query, params="X-Plex-Container-Start=0&X-Plex-Container-Size=5")
@@ -176,8 +185,8 @@ def xhr_recent_albums():
         p = PlexLibrary(s.ip)
         query = None
         for section in s.sections:
-            if 'artist' in s.sections[section]['type']:
-                query=s.sections[section]['key']
+            if 'artist' in section:
+                query=s.sections[section]['sections'][0]['key']
                 break
 
         recentlyAdded = p.recentlyAdded(section=query, params="X-Plex-Container-Start=0&X-Plex-Container-Size=5")
@@ -198,8 +207,8 @@ def xhr_recent_photos():
         p = PlexLibrary(s.ip)
         query = None
         for section in s.sections:
-            if 'photo' in s.sections[section]['type']:
-                query=s.sections[section]['key']
+            if 'photo' in section:
+                query=s.sections[section]['sections'][0]['key']
                 break
 
         recentlyAdded = p.recentlyAdded(section=query, params="X-Plex-Container-Start=0&X-Plex-Container-Size=5")
@@ -223,6 +232,19 @@ def xhr_plex_section(id):
             server=s,
             media=items['MediaContainer'],
             address=safeAddress(s.ip),
+        )
+    except Exception as e:
+        return error(e)
+
+
+@app.route('/xhr/plex/sections/<label>/')
+def xhr_plex_sections(label):
+    try:
+        s = getActiveServer()
+        sections = s.sections[label]
+        return render_template('plex/library_list.html',
+            server=s,
+            sections=sections,
         )
     except Exception as e:
         return error(e)

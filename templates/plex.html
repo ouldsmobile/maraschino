@@ -18,9 +18,16 @@
             </li>
             {% for s in server.sections %}
                 {% set section = server.sections[s] %}
-                <li data-key="section/{{section['key']}}" title="{{section['title']}}">
-                    <span class="{{section['type']}}">{{ section['title'] }} </span>
-                </li>
+                {% if section['size'] > 1 %}
+                    <li data-key="sections/{{section['label']}}" title="{{section['label']}}" >
+                        <span class="{{section['label']}}">{{section['label']}}</span>
+                    </li>
+                {% elif section['size'] == 1 %}
+                    {% set section = server.sections[s]['sections'][0] %}
+                    <li data-key="section/{{section['key']}}" title="{{section['title']}}">
+                        <span class="{{section['type']}}">{{ section['title'] }} </span>
+                    </li>
+                {% endif %}
             {% endfor %}
         </ul>
 

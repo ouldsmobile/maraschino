@@ -262,7 +262,7 @@ $(document).ready(function() {
     });
   });
 
-  $(document).on('click', 'div#plex.module .plexMenu li', function(){
+  $(document).on('click', 'div#plex.module .plexMenu li, #plex ul.list li', function(){
     $(this).children().css('background', 'url('+WEBROOT+'/static/images/xhrloading.gif) no-repeat center').html('&nbsp;');
     id = $(this).data('key');
     $.get(WEBROOT + '/xhr/plex/'+id, function(data){
