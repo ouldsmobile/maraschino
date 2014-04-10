@@ -45,12 +45,15 @@
     ul.onDeck
     {
         display: inline-block;
+        max-height: 400px;
+        overflow: auto;
         li
         {
             float: left;
             width: 15%;
             padding: 2.5%;
             position: relative;
+            overflow: hidden;
             a
             {
                 position: relative;
@@ -69,7 +72,7 @@
                     background-color: black;
                     padding: 5px;
                     color: white;
-                    margin-top: -20px;
+                    margin-top: -25px;
                 }
             }
         }
@@ -78,9 +81,9 @@
     ul.section
     {
         max-height: 264px;
-        overflow-y: scroll !important;
+        overflow-y: auto !important;
         cursor: pointer;
-        width: 98%;
+        width: 99%;
         overflow: hidden;
         padding: 2px;
 

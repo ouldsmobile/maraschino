@@ -1,5 +1,4 @@
-import urllib2, base64, sys, uuid
-from urllib import quote
+import urllib2, base64, sys, platform
 sys.path.append("..")
 from xmltodict import xmltodict
 
@@ -81,9 +80,15 @@ class PlexServer(object):
         try:
             r = urllib2.Request("https://my.plexapp.com/users/sign_in.xml", data="")
             base64string = base64.encodestring('%s:%s' % (self.username, self.password)).replace('\n', '')
-            id = uuid.uuid4()
             r.add_header("Authorization", "Basic %s" % base64string)
-            r.add_header("X-Plex-Client-Identifier", "%s" % quote(str(id)))
+            r.add_header("X-Plex-Client-Identifier", str(platform.node()))
+            r.add_header('X-Plex-Platform', str(platform.system()))
+            r.add_header('X-Plex-Platform-Version', str(platform.release()))
+            r.add_header('X-Plex-Product', 'Maraschino')
+            r.add_header('X-Plex-Product-Version', ':D')
+            r.add_header('X-Plex-Device', str(platform.node()))
+            r.add_header('X-Plex-Device-Name', 'Web Frontend')
+            r.add_header('X-Plex-Model', ':-) :)')
             r = urllib2.urlopen(r)
             el = xmltodict.parse(r.read())
             return el['user']['@authenticationToken']
