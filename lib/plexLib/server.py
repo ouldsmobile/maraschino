@@ -1,54 +1,71 @@
-import urllib2, json, base64
-import sys
+import urllib2, base64, sys, uuid
+from urllib import quote
 sys.path.append("..")
 from xmltodict import xmltodict
 
 class PlexServer(object):
 
-    def __init__(self, ip=None, port=32400, username=None, password=None):
+    def __init__(self, ip=None, port=32400, username=None, password=None, token=None, scheme="http://"):
         self.ip = ip
         self.port = port
         self.username = username
         self.password = password
+        self.token = token
+        self.scheme = scheme
 
 
     def __str__(self):
-        return "<PlexServer: %s:%d/>" % (self.ip, self.port) 
-    
+        return "<PlexServer: %s:%d/>" % (self.ip, self.port)
+
 
     def __repr__(self):
-        return "<PlexServer: %s:%d/>" % (self.ip, self.port) 
+        return "<PlexServer: %s:%d/>" % (self.ip, self.port)
 
 
-    def address(self, params=''):
-        return "http://%s:%s/%s" %(self.ip, self.port, params)
+    def setIp(self, ip):
+        self.ip = ip
 
 
-    def query(self, params=''):
+    def setPort(self, port):
+        self.port = port
+
+
+    def setPassword(self, password):
+        self.password = password
+
+
+    def setUsername(self, username):
+        self.username = username
+
+
+    def setToken(self, token):
+        self.token = token
+
+
+    def setScheme(self, scheme):
+        self.scheme = scheme
+
+
+    def buildURL(self, path, params=""):
+        return "%s%s?X-Plex-Token=%s&%s" % (self.address(), path, self.token, params)
+
+
+    def address(self):
+        return "%s%s:%s/" % (self.scheme, self.ip, self.port)
+
+
+    def query(self, url):
         try:
-            r = urllib2.Request(self.address(params))
+            r = urllib2.Request(url)
             r = urllib2.urlopen(r)
             return xmltodict.parse(r.read())
         except urllib2.URLError, e:
             print e
-        
-        return False
-            
 
-    def basicInfo(self, param=''):
-        try:
-            info = self.query()
-            if param is not '':
-                return info.childNodes[0].attributes[param].value 
-
-            return info
-        except:
-            print 'Error loading Plex Info from %s' %(self.address())
-        
         return False
 
 
-    def getServerInfo(self):
+    def getServers(self):
         try:
             r = urllib2.Request("https://plex.tv/pms/servers.xml")
             base64string = base64.encodestring('%s:%s' % (self.username, self.password)).replace('\n', '')
@@ -58,4 +75,54 @@ class PlexServer(object):
             return el['MediaContainer']
         except urllib2.URLError:
             raise
+
+
+    def getToken(self):
+        try:
+            r = urllib2.Request("https://my.plexapp.com/users/sign_in.xml", data="")
+            base64string = base64.encodestring('%s:%s' % (self.username, self.password)).replace('\n', '')
+            id = uuid.uuid4()
+            r.add_header("Authorization", "Basic %s" % base64string)
+            r.add_header("X-Plex-Client-Identifier", "%s" % quote(str(id)))
+            r = urllib2.urlopen(r)
+            el = xmltodict.parse(r.read())
+            return el['user']['@authenticationToken']
+        except urllib2.URLError:
+            raise
+
+
+    def image(self, path):
+        try:
+            r = urllib2.Request(self.buildURL(path))
+            r = urllib2.urlopen(r)
+            return r.read()
+        except urllib2.URLError, e:
+            print e
+
+    def onDeck(self):
+        return self.query(self.buildURL('library/onDeck'))
+
+
+    def recentlyAdded(self, section=None, params=""):
+        if section:
+            return self.query(self.buildURL('library/sections/%s/recentlyAdded' % (section), params))
+
+        return self.query(self.buildURL('library/recentlyAdded', params))
+
+
+    def sections(self):
+        return self.query(self.buildURL('library/sections'))
+
+
+    def getSection(self, id):
+        return self.query(self.buildURL('library/sections/%s/all' % id))
+
+
+    def refreshSection(self, id):
+        return self.query(self.buildURL('library/section/%s/refresh' % id))
+
+
+    def nowPlaying(self):
+        return self.query(self.buildURL('status/sessions'))
+
 

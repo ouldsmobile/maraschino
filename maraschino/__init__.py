@@ -152,12 +152,12 @@ def initialize():
         SERVER = wsgiserver.CherryPyWSGIServer((HOST, PORT), d)
 
         __INITIALIZED__ = True
-        threading.Thread(target=updatePlexInfo).start()
         return True
 
 
 def init_updater():
     from maraschino.updater import checkGithub, gitCurrentVersion
+    from maraschino.noneditable import updatePlexInfo
     global USE_GIT, CURRENT_COMMIT, COMMITS_BEHIND
 
     if UPDATER:
@@ -177,6 +177,7 @@ def init_updater():
             COMMITS_BEHIND = -1
 
         threading.Thread(target=checkGithub).start()
+        threading.Thread(target=updatePlexInfo).start()
 
 
 def start_schedules():
@@ -184,6 +185,7 @@ def start_schedules():
     if UPDATER:
         # check every 6 hours for a new version
         from maraschino.updater import checkGithub
+        from maraschino.noneditable import updatePlexInfo
         SCHEDULE.add_interval_job(checkGithub, hours=6)
         SCHEDULE.add_interval_job(updatePlexInfo, hours=6)
     SCHEDULE.start()
@@ -275,87 +277,6 @@ def daemonize():
     if PIDFILE:
         logger.log('Writing PID %s to %s' % (pid, PIDFILE), 'INFO')
         file(PIDFILE, 'w').write("%s\n" % pid)
-
-
-def updatePlexInfo():
-    from plexLib import PlexServer as connect
-    from tools import get_setting_value
-    from flask import jsonify
-    from urllib2 import HTTPError
-
-    if not get_setting_value('myPlex_username') or not get_setting_value('myPlex_password'):
-        logger.log('Plex :: missing myPlex username or password', 'INFO')
-        return
-
-    logger.log('Plex :: Updating plex server information', 'INFO')
-    p = connect(
-        username=get_setting_value('myPlex_username'),
-        password=get_setting_value('myPlex_password')
-    )
-
-    if not p:
-        logger.log('Plex :: Failed to get Plex server.xml info', 'WARNING')
-        return
-
-    updated=[]
-    try:
-        servers = p.getServerInfo() # get servers from plex.tv server.xml
-        if servers['@size'] == '1':
-            addPlexServer(servers['Server']['@name'], servers['Server']['@localAddresses'], servers['Server']['@machineIdentifier'], servers['Server']['@version'], int(servers['Server']['@owned']))
-            updated.append(servers['Server']['@machineIdentifier'])
-        else:
-            for server in servers['Server']:
-                addPlexServer(server['@name'], server['@localAddresses'], server['@machineIdentifier'], server['@version'], int(server['@owned']))
-                updated.append(server['@machineIdentifier'])
-
-        removeStaleServers(updated)
-    except HTTPError as e:
-        if e.code == 401:
-            logger.log("Plex :: Wrong Username/Password: %s" % e.msg, 'ERROR')
-        else:
-            logger.log("Plex :: HTTP Error: %s" % e, 'ERROR')
-        return jsonify({'success': False, 'msg': e})
-    except Exception as e:
-        logger.log("Plex :: Failed to update plex servers in db: %s" % e, 'ERROR')
-        return jsonify({'success': False, 'msg': e})
-
-
-def addPlexServer(name, localAddresses, machineIdentifier, version, owned):
-    from maraschino.models import PlexServer
-    from maraschino.database import db_session
-    s = PlexServer.query.filter(PlexServer.machineIdentifier == machineIdentifier).first()
-    if s:
-        logger.log('Plex :: Updating PlexServer %s in db' %(name), 'DEBUG')
-        s.name = name
-        s.localAddresses = localAddresses
-        s.machineIdentifier = machineIdentifier
-        s.version = version
-        s.owned = int(owned)
-
-    else:
-        logger.log('Plex :: Adding PlexServer %s to db' %(name), 'DEBUG')
-        s = PlexServer(
-           name,
-           localAddresses,
-           machineIdentifier,
-           version,
-           int(owned)
-        )
-
-    db_session.add(s)
-    db_session.commit()
-
-
-def removeStaleServers(current):
-    from maraschino.models import PlexServer
-    from maraschino.database import db_session
-    servers = PlexServer.query.order_by(PlexServer.id).all()
-    for server in servers:
-        if server.machineIdentifier not in current:
-            db_session.delete(server)
-            logger.log("Plex :: Removed %s from db as it is stale" % server, 'DEBUG')
-
-    db_session.commit()
 
 
 @app.context_processor

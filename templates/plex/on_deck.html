@@ -8,9 +8,9 @@
             {% if "episode" in x['@type'] %}
                 <a href="http://plex.tv/web/app#!/server/{{id}}/details/{{x['@key']|replace('/', '%2F')}}" target="_blank">
                     <img src="/xhr/plex/img{{x['@grandparentThumb']}}">
-                    <p>{{x['@parentIndex']}}x{{x['@index']}}
+                    <p>{{x['@parentIndex']}}x{{x['@index']}}</p>
                 </a>
-            {% elif "movie" in x['@type'] %}
+            {% else %}
                 <a href="http://plex.tv/web/app#!/server/{{id}}/details/{{x['@key']|replace('/', '%2F')}}" target="_blank">
                     <img
                     src="/xhr/plex/img{{ x['@thumb'] }}" class="movie">

@@ -45,22 +45,39 @@ class PlexServer(Base):
     __tablename__ = 'plexserver'
     id = Column(Integer, primary_key=True)
     name = Column(String(100))
-    ip = Column(String(100))
+    address = Column(String(100))
+    port = Column(String(10))
+    scheme = Column(String(10))
+    host = Column(String(100))
+    localAddresses = Column(String(100))
+    address = Column(String(100))
     machineIdentifier = Column(String(100))
-    version = Column(String(100))    
+    version = Column(String(100))
     owned = Column(Integer)
+    synced = Column(Integer)
+    createdAt = Column(String(100))
+    updatedAt = Column(String(100))
+    token = Column(String(100))
     sections = Column(PickleType)
 
-    def __init__(self, name, ip, machineIdentifier, version, owned, sections={}):
+    def __init__(self, name, address, port, scheme, host, localAddresses, machineIdentifier, createdAt, updatedAt, synced, version, owned, token, sections={}):
         self.name = name
-        self.ip = ip
+        self.address = address
+        self.port = port
+        self.scheme = scheme
+        self.host = host
+        self.localAddresses = localAddresses
         self.machineIdentifier = machineIdentifier
+        self.updatedAt = updatedAt
+        self.createdAt = createdAt
+        self.synced = synced
         self.version = version
         self.owned = owned
+        self.token = token
         self.sections = sections
 
     def __repr__(self):
-        return '<PlexServer %r @ %s>' % (self.name, self.ip)
+        return '<PlexServer %r @ %s>' % (self.name, self.localAddresses)
 
 
 class Application(Base):
