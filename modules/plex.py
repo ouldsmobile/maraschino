@@ -10,11 +10,11 @@ def safeAddress(ip, port=32400):
     return "http://%s:%s" % (ip, port)
 
 
-def error(e):
-    global plex
-    return render_template('plex.html',
+def error(e, module='plex'):
+    return render_template('plex/error.html',
         error=True,
-        exception=e
+        exception=e,
+        module=module,
     )
 
 
@@ -153,7 +153,7 @@ def xhr_recent_movies():
         )
     except Exception as e:
         plex_log(e, 'ERROR')
-        return error(e)
+        return error(e, module="plex_recent_movies")
 
 
 @app.route('/xhr/plex_recent_episodes/')
@@ -175,7 +175,7 @@ def xhr_recent_episodes():
             episodes=recentlyAdded['MediaContainer'],
         )
     except Exception as e:
-        return error(e)
+        return error(e, module="plex_recent_episodes")
 
 
 @app.route('/xhr/plex_recent_albums/')
@@ -197,7 +197,7 @@ def xhr_recent_albums():
             albums=recentlyAdded['MediaContainer'],
         )
     except Exception as e:
-        return error(e)
+        return error(e, module="plex_recent_albums")
 
 
 @app.route('/xhr/plex_recent_photos/')
@@ -219,7 +219,7 @@ def xhr_recent_photos():
             photos=recentlyAdded['MediaContainer'],
         )
     except Exception as e:
-        return error(e)
+        return error(e, module="plex_recent_photos")
 
 
 @app.route('/xhr/plex/section/<int:id>/')
@@ -320,7 +320,7 @@ def xhr_plex_now_playing():
             songs=songs,
             photos=photos,
         )
-    except Exception as e:
-        return error(e)
+    except:
+        return jsonify({'playing': False})
 
 
