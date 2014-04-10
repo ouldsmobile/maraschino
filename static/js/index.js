@@ -317,6 +317,13 @@ $(document).ready(function() {
     }
   });
 
+  $(document).on('change', 'select#change_movies, select#change_albums, select#change_episodes, select#change_photos', function(event) {
+    var parent = $(this).parent(".module").attr('id');
+    $.get(WEBROOT + '/xhr/'+ parent +'/'+$(this).val(), function(data){
+      $('div#'+parent+'.module').replaceWith($(data));
+    });
+  });
+
   /*** END PLEX ***/
 
   /*** SICKBEARD ***/

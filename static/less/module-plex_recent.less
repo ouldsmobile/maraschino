@@ -3,6 +3,12 @@
 #plex_recent_photos,
 #plex_recent_episodes
 {
+    select
+    {
+        float: right;
+        max-width: 150px;
+        margin: 15px;
+    }
     ul
     {
         max-height: 500px;
@@ -52,4 +58,9 @@
         }
     }
 
+}
+
+.f_settings_mode div[id*="plex_recent"] select[id*="change_"]
+{
+    display: none;
 }

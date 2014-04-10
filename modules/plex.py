@@ -3,7 +3,7 @@ from maraschino import app, logger, RUNDIR
 from maraschino.tools import requires_auth, get_setting_value
 from maraschino.models import PlexServer as dbserver
 from plexLib import PlexServer
-import base64, urllib2, StringIO
+import StringIO
 
 
 def error(e, module='plex'):
@@ -47,95 +47,45 @@ def xhr_on_deck():
         return error(e)
 
 
-@app.route('/xhr/plex_recent_movies/')
-def xhr_recent_movies():
+@app.route('/xhr/plex_recent_<title>/')
+@app.route('/xhr/plex_recent_<title>/<int:id>/')
+def xhr_recent_movies(title, id=None):
+    if 'movies' in title:
+        type = 'movie'
+    elif 'episodes' in title:
+        type = 'show'
+    elif 'albums' in title:
+        type = 'artist'
+    elif 'photos' in title:
+        type = 'photo'
+
     try:
         p, s = getActiveServer()
-        query = None
-        for section in s.sections:
-            if 'movie' in section:
-                query=s.sections[section]['sections'][0]['key']
-                break
+        if id is None:
+            for section in s.sections:
+                if type in section:
+                    id=s.sections[section]['sections'][0]['key']
+                    break
 
-        recentlyAdded = p.recentlyAdded(section=query, params="X-Plex-Container-Start=0&X-Plex-Container-Size=5")
+        recentlyAdded = p.recentlyAdded(section=id, params="X-Plex-Container-Start=0&X-Plex-Container-Size=5")
 
-        for movie in recentlyAdded['MediaContainer']['Video']:
-            try:
-                movie['@rating'] = round(float(movie['@rating']), 1)
-            except:
-                pass
+        if 'movies' in title:
+            for movie in recentlyAdded['MediaContainer']['Video']:
+                try:
+                    movie['@rating'] = round(float(movie['@rating']), 1)
+                except:
+                    pass
 
         return render_template('plex/recent.html',
-            title='movies',
+            type=type,
+            id=int(id),
+            title=title,
             server=s,
-            movies=recentlyAdded['MediaContainer'],
+            items=recentlyAdded['MediaContainer'],
         )
     except Exception as e:
         plex_log(e, 'ERROR')
         return error(e, module="plex_recent_movies")
-
-
-@app.route('/xhr/plex_recent_episodes/')
-def xhr_recent_episodes():
-    try:
-        p, s = getActiveServer()
-        query = None
-        for section in s.sections:
-            if 'show' in section:
-                query=s.sections[section]['sections'][0]['key']
-                break
-
-        recentlyAdded = p.recentlyAdded(section=query, params="X-Plex-Container-Start=0&X-Plex-Container-Size=5")
-
-        return render_template('plex/recent.html',
-            title='episodes',
-            server=s,
-            episodes=recentlyAdded['MediaContainer'],
-        )
-    except Exception as e:
-        return error(e, module="plex_recent_episodes")
-
-
-@app.route('/xhr/plex_recent_albums/')
-def xhr_recent_albums():
-    try:
-        p, s = getActiveServer()
-        query = None
-        for section in s.sections:
-            if 'artist' in section:
-                query=s.sections[section]['sections'][0]['key']
-                break
-
-        recentlyAdded = p.recentlyAdded(section=query, params="X-Plex-Container-Start=0&X-Plex-Container-Size=5")
-
-        return render_template('plex/recent.html',
-            title='albums',
-            server=s,
-            albums=recentlyAdded['MediaContainer'],
-        )
-    except Exception as e:
-        return error(e, module="plex_recent_albums")
-
-
-@app.route('/xhr/plex_recent_photos/')
-def xhr_recent_photos():
-    try:
-        p, s = getActiveServer()
-        query = None
-        for section in s.sections:
-            if 'photo' in section:
-                query=s.sections[section]['sections'][0]['key']
-                break
-
-        recentlyAdded = p.recentlyAdded(section=query, params="X-Plex-Container-Start=0&X-Plex-Container-Size=5")
-
-        return render_template('plex/recent.html',
-            title='photos',
-            server=s,
-            photos=recentlyAdded['MediaContainer'],
-        )
-    except Exception as e:
-        return error(e, module="plex_recent_photos")
 
 
 @app.route('/xhr/plex/section/<int:id>/')

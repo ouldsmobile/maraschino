@@ -2,12 +2,22 @@
 
     <div class="module_settings"><span>Settings</span></div>
     <div class="module_remove"><span>Remove</span></div>
-    {% set id = server.machineIdentifier %}
-
+    {% if server.sections[type]["size"] > 1 %}
+        <select id="change_{{title}}">
+            <option value=""></option>
+            {% for section in server.sections[type]["sections"] %}
+                {% set key = server.sections[type]["sections"][section]["key"]%}
+                <option value="{{ key }}" {% if key|int == id %}selected{% endif %}>
+                    {{- server.sections[type]["sections"][section]["title"] -}}
+                </option>
+            {% endfor %}
+        </select>
+    {% endif %}
     <h2>Recently Added {{title|capitalize}}</h2>
+    {% set id = server.machineIdentifier %}
     <ul>
     {% if 'movies' in title %}
-        {% for movie in movies['Video'] %}
+        {% for movie in items['Video'] %}
             <li>
                 <a href="http://plex.tv/web/app#!/server/{{id}}/details/{{movie['@key']|replace('/', '%2F')}}" target="_blank">
                     <img src="/xhr/plex/img{{ movie['@thumb'] }}">
@@ -20,7 +30,7 @@
             </li>
         {% endfor %}
     {% elif 'episodes' in title %}
-        {% for episode in episodes['Video'] %}
+        {% for episode in items['Video'] %}
             <li>
                 <a href="http://plex.tv/web/app#!/server/{{id}}/details/{{episode['@key']|replace('/', '%2F')}}" target="_blank">
                     <img src="/xhr/plex/img{{ episode['@thumb'] }}">
@@ -33,7 +43,7 @@
             </li>
         {% endfor %}
     {% elif 'albums' in title %}
-        {% for album in albums['Directory'] %}
+        {% for album in items['Directory'] %}
             <li>
                 <a href="http://plex.tv/web/app#!/server/{{id}}/details/{{album['@key']|replace('/', '%2F')}}" target="_blank">
                     <img src="/xhr/plex/img{{ album['@thumb'] }}">
@@ -46,7 +56,7 @@
             </li>
         {% endfor %}
     {% else %}
-        {% for photo in photos['Photo'] %}
+        {% for photo in items['Photo'] %}
             <li>
                 <a href="http://plex.tv/web/app#!/server/{{id}}/details/{{photo['@key']|replace('/', '%2F')}}" target="_blank">
                     <img src="/xhr/plex/img{{ photo['@thumb'] }}">

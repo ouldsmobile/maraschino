@@ -8,7 +8,6 @@ from plexLib import PlexServer as connect
 from maraschino import logger, app
 from flask import jsonify
 from urllib2 import HTTPError
-import time
 
 
 def updatePlexInfo():
@@ -139,6 +138,7 @@ def switch_server(server_id=None):
             db_session.add(active_server)
             db_session.commit()
             logger.log('Switched active server to ID %s' % server_id , 'INFO')
+            plexUpdateSections(server_id)
         else:
             logger.log('Switching server prevented, server ID %s does not exist in db' % server_id, 'INFO')
 
