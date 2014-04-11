@@ -6,14 +6,40 @@ from maraschino.models import PlexServer, Setting
 from maraschino.database import db_session
 from plexLib import PlexServer as connect
 from maraschino import logger, app
-from flask import jsonify
+from flask import jsonify, request
 from urllib2 import HTTPError
+try:
+    import json
+except ImportError:
+    import simplejson as json
+
+
+@app.route('/xhr/plex/tutorial_save/', methods=['POST'])
+def tutorial_save():
+    try:
+        settings = json.JSONDecoder().decode(request.form['settings'])
+        for s in settings:
+            setting = get_setting(s['name'])
+
+            if not setting:
+                setting = Setting(s['name'])
+
+            setting.value = s['value']
+            db_session.add(setting)
+        db_session.commit()
+        logger.log('Plex :: Successfully saved Plex credentials', 'INFO')
+        return updatePlexInfo()
+    except:
+        return jsonify({ 'success': False, 'msg': 'Failed to save plex credentials to db' })
 
 
 def updatePlexInfo():
     if not get_setting_value('myPlex_username') or not get_setting_value('myPlex_password'):
         logger.log('Plex :: missing myPlex username or password', 'INFO')
-        return
+        try:
+            return jsonify({'success': False, 'msg': 'Missing plex credentials'})
+        except:
+            return
 
     logger.log('Plex :: Updating plex server information', 'INFO')
     p = connect(username=get_setting_value('myPlex_username'),
@@ -22,7 +48,10 @@ def updatePlexInfo():
 
     if not p:
         logger.log('Plex :: Failed to get Plex server.xml info', 'WARNING')
-        return
+        try:
+            return jsonify({'success': False, 'msg': 'Missing plex credentials'})
+        except:
+            return
 
     updated=[]
     try:
@@ -42,10 +71,16 @@ def updatePlexInfo():
             logger.log("Plex :: Wrong Username/Password: %s" % e.msg, 'ERROR')
         else:
             logger.log("Plex :: HTTP Error: %s" % e, 'ERROR')
-        return jsonify({'success': False, 'msg': e})
+        try:
+            return jsonify({'success': False, 'msg': e.msg})
+        except:
+            return
     except Exception as e:
         logger.log("Plex :: Failed to update plex servers in db: %s" % e, 'ERROR')
-        return jsonify({'success': False, 'msg': e})
+        try:
+            return jsonify({'success': False, 'msg': e})
+        except:
+            return
     except Exception, e:
         raise e
 
@@ -66,7 +101,10 @@ def updatePlexInfo():
     except Exception as e:
         logger.log('Plex :: %s' %e, 'ERROR')
 
-    return
+    try:
+        return jsonify({'success': True})
+    except:
+        return
 
 def addPlexServer(name, address, port, scheme, host, localAddresses, machineIdentifier, createdAt, updatedAt, synced, version, owned, token):
     s = PlexServer.query.filter(PlexServer.machineIdentifier == machineIdentifier).first()

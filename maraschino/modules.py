@@ -12,13 +12,11 @@ from maraschino.database import db_session
 import maraschino
 import copy
 
-from maraschino import logger
-
 from Maraschino import app
 from maraschino.tools import *
 
 from maraschino.database import *
-from maraschino.models import Module, NewznabSite, PlexServer
+from maraschino.models import Module, NewznabSite
 
 # name, label, description, and static are not user-editable and are taken from here
 # poll and delay are user-editable and saved in the database - the values here are the defaults

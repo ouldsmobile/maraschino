@@ -243,23 +243,24 @@ $(document).ready(function() {
     var settings = $('#tutorial input').serializeArray();
     settings[0].name = 'myPlex_'+settings[0].name;
     settings[1].name = 'myPlex_'+settings[1].name;
-    var request = $.post(WEBROOT + '/xhr/module_settings_save/plex',
-      { settings: JSON.stringify(settings) }
-    );
-    request.error(function(jqXHR, textStatus, errorThrown){
-      popup_message('Could not save myPlex info: ' + errorThrown);
-    });
-
-    request.success(function(){
-      $.get(WEBROOT+'/xhr/plex/listServers/', function(data) {
+    $.post(WEBROOT + '/xhr/plex/tutorial_save/',
+      { settings: JSON.stringify(settings) }, function(data) {
         if(data.success){
-          $('#server_settings .submenu ul').html('');
-          for (var i = 0; i < data.servers.length; i++) {
-            $('#server_settings .submenu ul').append('<li class="switch_server" data-server_id="'+data.servers[i][1]+'">'+data.servers[i][0]+'</li>');
-          }
+          $.get(WEBROOT+'/xhr/plex/listServers/', function(data) {
+            if(data.success){
+              $('#server_settings .submenu ul').html('');
+              for (var i = 0; i < data.servers.length; i++) {
+                $('#server_settings .submenu ul').append('<li class="switch_server" data-server_id="'+data.servers[i][1]+'">'+data.servers[i][0]+'</li>');
+              }
+            } else {
+              popup_message(data.msg);
+            }
+          });
+        } else {
+          popup_message('Could not save myPlex info: ' + data.msg);
         }
-      });
-    });
+      }
+    );
   });
 
   $(document).on('click', 'div#plex.module .plexMenu li, #plex ul.list li', function(){
