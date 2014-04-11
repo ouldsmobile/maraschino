@@ -3,7 +3,6 @@
 # Licensed under the MIT license.
 
 from server import PlexServer
-from library import PlexLibrary
 
 __author__    = u'Gustavo Hoirisch <gugahoi@gmail.com>'
 __version__   = u'0.1'
