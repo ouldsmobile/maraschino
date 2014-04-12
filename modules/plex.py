@@ -26,11 +26,7 @@ def getActiveServer():
 
 @app.route('/xhr/plex/')
 def plex():
-    try:
-        return xhr_on_deck()
-
-    except:
-        return error('Failed to read PlexServer from db')
+    return xhr_on_deck()
 
 
 @app.route('/xhr/plex/onDeck/')

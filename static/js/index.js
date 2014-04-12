@@ -1387,7 +1387,7 @@ $(document).ready(function() {
     $.get(WEBROOT + '/xhr/trakt/friend/' + action + '/' + user, function(data){
       if (data.status == 'successful') {
         if (action == 'approve') {
-          li.children('.req_buttons').remove()
+          li.children('.req_buttons').remove();
           li.css('background', 'url(' + WEBROOT + '/static/images/alpha/fff_10.png)');
           popup_message(user + ' has been added to friends list');
         }

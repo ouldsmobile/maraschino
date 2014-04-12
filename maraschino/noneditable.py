@@ -81,8 +81,6 @@ def updatePlexInfo():
             return jsonify({'success': False, 'msg': e})
         except:
             return
-    except Exception, e:
-        raise e
 
     try:
         selected_server = get_setting_value('active_server')
