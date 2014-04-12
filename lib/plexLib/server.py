@@ -2,6 +2,7 @@ import urllib2, base64, sys, platform
 sys.path.append("..")
 from xmltodict import xmltodict
 
+
 class PlexServer(object):
 
     def __init__(self, ip=None, port=32400, username=None, password=None, token=None, scheme="http://"):
@@ -59,7 +60,7 @@ class PlexServer(object):
             r = urllib2.urlopen(r)
             return xmltodict.parse(r.read())
         except urllib2.URLError, e:
-            print e
+            raise e
 
         return False
 
@@ -78,11 +79,14 @@ class PlexServer(object):
 
     def getToken(self):
         try:
+            system = str(platform.system())
+            if 'Darwin' in system:
+                system = 'MacOSX'
             r = urllib2.Request("https://my.plexapp.com/users/sign_in.xml", data="")
             base64string = base64.encodestring('%s:%s' % (self.username, self.password)).replace('\n', '')
             r.add_header("Authorization", "Basic %s" % base64string)
             r.add_header("X-Plex-Client-Identifier", str(platform.node()))
-            r.add_header('X-Plex-Platform', str(platform.system()))
+            r.add_header('X-Plex-Platform', system)
             r.add_header('X-Plex-Platform-Version', str(platform.release()))
             r.add_header('X-Plex-Product', 'Maraschino')
             r.add_header('X-Plex-Product-Version', ':D')
@@ -102,7 +106,7 @@ class PlexServer(object):
             r = urllib2.urlopen(r)
             return r.read()
         except urllib2.URLError, e:
-            print e
+            raise e
 
     def onDeck(self):
         return self.query(self.buildURL('library/onDeck'))
