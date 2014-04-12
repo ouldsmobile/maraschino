@@ -7,7 +7,7 @@ from maraschino.database import db_session
 from plexLib import PlexServer as connect
 from maraschino import logger, app
 from flask import jsonify, request
-from urllib2 import HTTPError
+from urllib2 import HTTPError, URLError
 try:
     import json
 except ImportError:
@@ -42,21 +42,32 @@ def updatePlexInfo():
             return
 
     logger.log('Plex :: Updating plex server information', 'INFO')
-    p = connect(username=get_setting_value('myPlex_username'),
-        password=get_setting_value('myPlex_password')
-    )
-
-    if not p:
-        logger.log('Plex :: Failed to get Plex server.xml info', 'WARNING')
-        try:
-            return jsonify({'success': False, 'msg': 'Missing plex credentials'})
-        except:
-            return
-
     updated=[]
+    # Fetching servers.xml from plex.tv
     try:
+        p = connect(username=get_setting_value('myPlex_username'),
+            password=get_setting_value('myPlex_password')
+        )
         servers = p.getServers() # get servers from plex.tv server.xml
+    except HTTPError as e:
+        if e.code == 401:
+            logger.log("Plex :: Wrong Username/Password: %s" % e.msg, 'ERROR')
+        else:
+            logger.log("Plex :: HTTP Error: %s" % e, 'ERROR')
+        return jsonify({'success': False, 'msg': 'Wrong Username/Password: %s' % e.msg})
+    except Exception, e:
+        logger.log('Plex :: Failed to retrieve server information from myPlex account', 'ERROR')
+        return jsonify({'success': False, 'msg': 'Failed to retrieve server information from myPlex account'})
+
+    # Fetching token from plex.tv for local authentication
+    try:
         token = p.getToken()
+    except:
+        logger.log('Plex :: Failed to retrieve token, if "local authentication" is necessary Maraschino may not work with Plex', 'WARNING')
+        token = None
+
+    # Storing server information into db
+    try:
         if servers['@size'] == '1':
             addPlexServer(servers['Server']['@name'], servers['Server']['@address'], servers['Server']['@port'], servers['Server']['@scheme'], servers['Server']['@host'], servers['Server']['@localAddresses'], servers['Server']['@machineIdentifier'], servers['Server']['@createdAt'], servers['Server']['@updatedAt'], servers['Server']['@synced'], servers['Server']['@version'], servers['Server']['@owned'], token)
             updated.append(servers['Server']['@machineIdentifier'])
@@ -64,40 +75,32 @@ def updatePlexInfo():
             for server in servers['Server']:
                 addPlexServer(server['@name'], server['@address'], server['@port'], server['@scheme'], server['@host'], server['@localAddresses'], server['@machineIdentifier'], server['@createdAt'], server['@updatedAt'], server['@synced'], server['@version'], server['@owned'], token)
                 updated.append(server['@machineIdentifier'])
+    except:
+        logger.log('Plex :: Failed to store server information in database', 'ERROR')
+        return jsonify({'success': False, 'msg': 'Failed to store Plex server information in database'})
 
+    # Removing Old Servers from db
+    try:
         removeStaleServers(updated)
-    except HTTPError as e:
-        if e.code == 401:
-            logger.log("Plex :: Wrong Username/Password: %s" % e.msg, 'ERROR')
-        else:
-            logger.log("Plex :: HTTP Error: %s" % e, 'ERROR')
-        try:
-            return jsonify({'success': False, 'msg': e.msg})
-        except:
-            return
-    except Exception as e:
-        logger.log("Plex :: Failed to update plex servers in db: %s" % e, 'ERROR')
-        try:
-            return jsonify({'success': False, 'msg': e})
-        except:
-            return
+    except:
+        logger.log('Plex :: Failed to remove stale servers from db', 'DEBUG')
 
     try:
-        selected_server = get_setting_value('active_server')
-        if selected_server is None:
-            first = PlexServer.query.filter(PlexServer.owned == 1).first()
-            switch_server(first.id)
-            selected_server = get_setting_value('active_server')
-            logger.log('Plex :: Server automatically selected by "owned" attribute', 'DEBUG')
-    except Exception as e:
-        logger.log('Plex :: Failed to automatically set active server, please do it manually!', 'ERROR')
+        # if no server has been selected try one by one ordered by last updated and first owned
+        if get_setting_value('active_server') is None:
+            server = PlexServer.query.filter(PlexServer.owned == 1).order_by(PlexServer.updatedAt).first()
+            if server:
+                switch_server(server.id)
+            else:
+                switch_server(1)
 
-    try:
-        server = PlexServer.query.filter(PlexServer.id == selected_server).first()
-        if server is not None:
-            plexUpdateSections(server.id)
+        plexUpdateSections(get_setting_value('active_server'))
     except Exception as e:
-        logger.log('Plex :: %s' %e, 'ERROR')
+        logger.log('Plex :: Problem updating server sections: %s' %e, 'ERROR')
+        try:
+            return jsonify({'success': False, 'msg': 'Problem updating server sections'})
+        except:
+            return
 
     try:
         return jsonify({'success': True})
@@ -107,7 +110,7 @@ def updatePlexInfo():
 def addPlexServer(name, address, port, scheme, host, localAddresses, machineIdentifier, createdAt, updatedAt, synced, version, owned, token):
     s = PlexServer.query.filter(PlexServer.machineIdentifier == machineIdentifier).first()
     if s:
-        logger.log('Plex :: Updating PlexServer %s in db' %(name), 'DEBUG')
+        logger.log('Plex :: Updating PlexServer %s in db' %(name), 'INFO')
         s.name = name
         s.address = address
         s.port = port
@@ -123,7 +126,7 @@ def addPlexServer(name, address, port, scheme, host, localAddresses, machineIden
         s.token = token
 
     else:
-        logger.log('Plex :: Adding PlexServer %s to db' %(name), 'DEBUG')
+        logger.log('Plex :: Adding PlexServer %s to db' %(name), 'INFO')
         s = PlexServer(
                 name,
                 address,
@@ -174,7 +177,6 @@ def switch_server(server_id=None):
             db_session.add(active_server)
             db_session.commit()
             logger.log('Switched active server to ID %s' % server_id , 'INFO')
-            plexUpdateSections(server_id)
         else:
             logger.log('Switching server prevented, server ID %s does not exist in db' % server_id, 'INFO')
 
@@ -187,16 +189,36 @@ def switch_server(server_id=None):
 @app.route('/xhr/plex/updateSection/<int:id>/force/')
 def plexUpdateSections(id):
     db_section = {
-        'movie': {'size': 0, 'sections': {}, 'label': 'movie'},
-        'home': {'size': 0, 'sections': {}, 'label': 'home'},
-        'photo': {'size': 0, 'sections': {}, 'label': 'photo'},
-        'artist': {'size': 0, 'sections': {}, 'label': 'artist'},
-        'show': {'size': 0, 'sections': {}, 'label': 'show'},
+        'movie': {'size': 0, 'sections': {}, 'label': 'movie', 'lastViewed': 0},
+        'home': {'size': 0, 'sections': {}, 'label': 'home', 'lastViewed': 0},
+        'photo': {'size': 0, 'sections': {}, 'label': 'photo', 'lastViewed': 0},
+        'artist': {'size': 0, 'sections': {}, 'label': 'artist', 'lastViewed': 0},
+        'show': {'size': 0, 'sections': {}, 'label': 'show', 'lastViewed': 0},
     }
+
     try:
         plex = PlexServer.query.filter(PlexServer.id == id).first()
+    except Exception, e:
+        logger.log('Plex :: Failed to retrieve server with id %i from database', 'ERROR')
+        try:
+            return jsonify({'success': False, 'msg': 'Failed to retrieve server from database'})
+        except:
+            return
+
+    try:
         p = connect(ip=plex.localAddresses, token=plex.token)
         sections = p.sections()
+    except URLError, e:
+        logger.log('Plex :: Failed to reach server: %s' % (e.reason), 'ERROR')
+        return jsonify({'success': False, 'msg': 'Failed to reach server: %s' % (e.reason)})
+    except Exception, e:
+        logger.log('Plex :: Failed to reach server for uknowkn reasons', 'ERROR')
+        try:
+            return jsonify({'success': False, 'msg': 'Unknowkn error when trying to reach the server'})
+        except:
+            return
+
+    try:
         for section in sections['MediaContainer']['Directory']:
             if 'video' in section['@thumb']:
                 section['@type'] = u'home'
@@ -217,18 +239,24 @@ def plexUpdateSections(id):
         db_session.add(plex)
         db_session.commit()
         logger.log('Plex :: Successfully updated %s sections' % plex, 'INFO')
-        return True
     except Exception, e:
-        logger.log(e, 'ERROR')
+        logger.log('Plex :: Failed to update sections for server', 'ERROR')
+        try:
+            return jsonify({'success': False, 'msg': 'Failed to update sections for server'})
+        except:
+            return
 
-    return False
+    try:
+        return jsonify({'success': True})
+    except:
+        return
 
 
 @app.route('/xhr/plex/listServers/')
 def listDbServer():
     servers = []
-    for s in PlexServer.query.order_by(PlexServer.id).all():
-        servers.append([s.name, s.id])
+    for server in PlexServer.query.order_by(PlexServer.id).all():
+        servers.append([server.name, server.id])
 
     return jsonify({'success': True, 'servers': servers })
 
@@ -246,4 +274,3 @@ def plexListSection(id):
         return 'Check terminal'
     except Exception, e:
         raise e
-
