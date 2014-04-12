@@ -9,7 +9,7 @@ import StringIO
 def error(e, module='plex'):
     return render_template('plex/error.html',
         error=True,
-        exception=e,
+        msg=e,
         module=module,
     )
 

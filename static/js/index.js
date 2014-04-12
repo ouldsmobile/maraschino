@@ -235,7 +235,7 @@ $(document).ready(function() {
 
   /*** PLEX ***/
   // tutorial settings save on change input
-  $(document).on('change', '#tutorial input#myPlex_username, #tutorial input#myPlex_password', function(event) {
+  $(document).on('change', '#tutorial input#myPlex_password', function(event) {
     event.preventDefault();
     if ($('#tutorial input#myPlex_username').val() === "" || $('#tutorial input#myPlex_password').val() === "" ) {
       return;
@@ -246,6 +246,8 @@ $(document).ready(function() {
     $.post(WEBROOT + '/xhr/plex/tutorial_save/',
       { settings: JSON.stringify(settings) }, function(data) {
         if(data.success){
+          $('#tutorial #myPlex_username').parent('li').append('<img src="/static/images/yes.png">');
+          $('#tutorial #myPlex_password').parent('li').append('<img src="/static/images/yes.png">');
           $.get(WEBROOT+'/xhr/plex/listServers/', function(data) {
             if(data.success){
               $('#server_settings .submenu ul').html('');
@@ -312,6 +314,7 @@ $(document).ready(function() {
         li.addClass('active');
 
         $.get(WEBROOT + '/xhr/plex/onDeck', function(data){
+          $('div#plex').attr('class', 'module');
           $('div#plex.module').replaceWith($(data));
         });
       });
