@@ -62,7 +62,7 @@ def updatePlexInfo():
             updated.append(servers['Server']['@machineIdentifier'])
         else:
             for server in servers['Server']:
-                addPlexServer(servers['@name'], servers['@address'], servers['@port'], servers['@scheme'], servers['@host'], servers['@localAddresses'], servers['@machineIdentifier'], servers['@createdAt'], servers['@updatedAt'], servers['@synced'], servers['@version'], servers['@owned'], token)
+                addPlexServer(server['@name'], server['@address'], server['@port'], server['@scheme'], server['@host'], server['@localAddresses'], server['@machineIdentifier'], server['@createdAt'], server['@updatedAt'], server['@synced'], server['@version'], server['@owned'], token)
                 updated.append(server['@machineIdentifier'])
 
         removeStaleServers(updated)
