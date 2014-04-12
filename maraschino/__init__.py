@@ -160,6 +160,7 @@ def init_updater():
     from maraschino.noneditable import updatePlexInfo
     global USE_GIT, CURRENT_COMMIT, COMMITS_BEHIND
 
+    threading.Thread(target=updatePlexInfo).start()
     if UPDATER:
         if os.name == 'nt':
             USE_GIT = False
@@ -177,7 +178,6 @@ def init_updater():
             COMMITS_BEHIND = -1
 
         threading.Thread(target=checkGithub).start()
-        threading.Thread(target=updatePlexInfo).start()
 
 
 def start_schedules():
