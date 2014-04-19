@@ -148,7 +148,7 @@ $(document).ready(function() {
   );
 
   function get_currently_playing() {
-    $.get(WEBROOT + '/xhr/plex/now_playing', function(data) {
+    $.get(WEBROOT + '/xhr/plex/now_playing/', function(data) {
       if (data.playing === false) {
 
         // hide currently playing
@@ -325,6 +325,16 @@ $(document).ready(function() {
     var parent = $(this).parent(".module").attr('id');
     $.get(WEBROOT + '/xhr/'+ parent +'/'+$(this).val(), function(data){
       $('div#'+parent+'.module').replaceWith($(data));
+    });
+  });
+
+  $(document).on('change', 'div[id*="plex_recent"] #settings select', function(){
+    var type = $(this).attr('id');
+    var val = $(this).val();
+    $.get(WEBROOT+'/xhr/plex/saveSection/'+type+'/'+val+'/', function(data) {
+      if(!data.success){
+        popup_message(data.msg);
+      }
     });
   });
 

@@ -58,7 +58,7 @@ class PlexServer(Base):
     createdAt = Column(String(100))
     updatedAt = Column(String(100))
     token = Column(String(100))
-    sections = Column(PickleType)
+    sections = Column(PickleType(mutable=True))
 
     def __init__(self, name, address, port, scheme, host, localAddresses, machineIdentifier, createdAt, updatedAt, synced, version, owned, token, sections={}):
         self.name = name

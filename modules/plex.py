@@ -64,15 +64,28 @@ def xhr_recent_movies(title, id=None):
 
     try:
         p, s = getActiveServer()
+        preferred = s.sections[type]['preferred']
         if id is None:
+            # if no explicit id, try to get preferred id
+            id = preferred
+            # if preferred id is 0 there is no preferred, select the first one in db
+            if id is 0:
+                for section in s.sections:
+                    if type in section:
+                        id=s.sections[section]['sections'][0]['key']
+                        break
+
+        # this might fail if preffered section id no longer exists so default back to one in db
+        try:
+            recentlyAdded = p.recentlyAdded(section=id, params="X-Plex-Container-Start=0&X-Plex-Container-Size=5")
+        except:
             for section in s.sections:
                 if type in section:
                     id=s.sections[section]['sections'][0]['key']
                     break
+            recentlyAdded = p.recentlyAdded(section=id, params="X-Plex-Container-Start=0&X-Plex-Container-Size=5")
 
-
-        recentlyAdded = p.recentlyAdded(section=id, params="X-Plex-Container-Start=0&X-Plex-Container-Size=5")
-
+        # perform rounding of rating to one decimal place for movies template
         if 'movies' in title:
             for movie in recentlyAdded['MediaContainer']['Video']:
                 try:
@@ -86,6 +99,7 @@ def xhr_recent_movies(title, id=None):
             title=title,
             server=s,
             items=recentlyAdded['MediaContainer'],
+            preferred=preferred,
         )
     except Exception as e:
         plex_log(e, 'ERROR')

@@ -4,7 +4,6 @@
     <div class="module_remove"><span>Remove</span></div>
     {% if server.sections[type]["size"] > 1 %}
         <select id="change_{{title}}">
-            <option value=""></option>
             {% for section in server.sections[type]["sections"] %}
                 {% set key = server.sections[type]["sections"][section]["key"]%}
                 <option value="{{ key }}" {% if key|int == id %}selected{% endif %}>
@@ -70,4 +69,16 @@
         {% endfor %}
     {%endif%}
     </ul>
+    <div id="settings">
+        <span>Default Section:</span>
+        <select id="{{type}}">
+        <option value="0">None</option>
+        {% for section in server.sections[type]["sections"] %}
+            {% set key = server.sections[type]["sections"][section]["key"] %}
+            <option value="{{ key }}" {% if key|int == preferred %}selected{% endif %}>
+                {{- server.sections[type]["sections"][section]["title"] -}}
+            </option>
+        {% endfor %}
+        </select>
+    </div>
 </div>

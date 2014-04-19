@@ -163,7 +163,6 @@ def switch_server(server_id=None):
     """
     Switches Plex servers manually.
     """
-
     try:
         active_server = get_setting('active_server')
 
@@ -186,25 +185,38 @@ def switch_server(server_id=None):
 
     return jsonify({ 'status': 'success' })
 
+
 @app.route('/xhr/plex/updateSection/<int:id>/force/')
 def plexUpdateSections(id):
     db_section = {
-        'movie': {'size': 0, 'sections': {}, 'label': 'movie', 'lastViewed': 0},
-        'home': {'size': 0, 'sections': {}, 'label': 'home', 'lastViewed': 0},
-        'photo': {'size': 0, 'sections': {}, 'label': 'photo', 'lastViewed': 0},
-        'artist': {'size': 0, 'sections': {}, 'label': 'artist', 'lastViewed': 0},
-        'show': {'size': 0, 'sections': {}, 'label': 'show', 'lastViewed': 0},
+        'movie': {'size': 0, 'sections': {}, 'label': 'movie', 'preferred': 0},
+        'home': {'size': 0, 'sections': {}, 'label': 'home', 'preferred': 0},
+        'photo': {'size': 0, 'sections': {}, 'label': 'photo', 'preferred': 0},
+        'artist': {'size': 0, 'sections': {}, 'label': 'artist', 'preferred': 0},
+        'show': {'size': 0, 'sections': {}, 'label': 'show', 'preferred': 0},
     }
 
+    # fetch server from db
     try:
         plex = PlexServer.query.filter(PlexServer.id == id).first()
     except Exception, e:
-        logger.log('Plex :: Failed to retrieve server with id %i from database', 'ERROR')
+        logger.log('Plex :: Failed to retrieve server with id %i from database' % (id), 'ERROR')
         try:
             return jsonify({'success': False, 'msg': 'Failed to retrieve server from database'})
         except:
             return
 
+    # keeping old preferred section
+    try:
+        db_section['movie']['preferred'] = plex.sections['movie']['preferred']
+        db_section['home']['preferred'] = plex.sections['home']['preferred']
+        db_section['photo']['preferred'] = plex.sections['photo']['preferred']
+        db_section['artist']['preferred'] = plex.sections['artist']['preferred']
+        db_section['show']['preferred'] = plex.sections['show']['preferred']
+    except:
+        pass
+
+    # attempt to get sections from server
     try:
         p = connect(ip=plex.localAddresses, token=plex.token)
         sections = p.sections()
@@ -218,6 +230,7 @@ def plexUpdateSections(id):
         except:
             return
 
+    # Go through each section and add it to new section dictionary
     try:
         for section in sections['MediaContainer']['Directory']:
             if 'video' in section['@thumb']:
@@ -274,3 +287,18 @@ def plexListSection(id):
         return 'Check terminal'
     except Exception, e:
         raise e
+
+
+@app.route('/xhr/plex/saveSection/<type>/<int:id>/')
+@requires_auth
+def savePreferredSection(type, id):
+    try:
+        server = PlexServer.query.filter(PlexServer.id == get_setting_value('active_server')).first()
+        server.sections[type]['preferred'] = int(id)
+        db_session.add(server)
+        db_session.commit()
+        logger.log('Plex :: Changed preferred %s section to %i' %(type, id), 'INFO')
+        return jsonify({'success': True})
+    except:
+        return jsonify({'success': False, 'msg': 'Failed to set preferred category'})
+

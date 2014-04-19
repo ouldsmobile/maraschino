@@ -3,7 +3,7 @@
 #plex_recent_photos,
 #plex_recent_episodes
 {
-    select
+    select[id*="change"]
     {
         float: right;
         max-width: 150px;
@@ -60,7 +60,28 @@
 
 }
 
-.f_settings_mode div[id*="plex_recent"] select[id*="change_"]
+.f_settings_mode div[id*="plex_recent"]
 {
-    display: none;
+    select[id*="change_"], ul
+    {
+        display: none;
+    }
+
+    div#settings
+    {
+        padding: 25px;
+        text-align: center;
+        span
+        {
+            font-weight: bold
+        }
+    }
+}
+
+.f_operation_mode div[id*="plex_recent"]
+{
+    div#settings
+    {
+        display: none;
+    }
 }
