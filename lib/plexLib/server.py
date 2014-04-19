@@ -57,7 +57,7 @@ class PlexServer(object):
     def query(self, url):
         try:
             r = urllib2.Request(url)
-            r = urllib2.urlopen(r)
+            r = urllib2.urlopen(r, None, 20)
             return xmltodict.parse(r.read())
         except urllib2.URLError, e:
             raise e
