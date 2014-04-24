@@ -243,26 +243,51 @@ $(document).ready(function() {
     var settings = $('#tutorial input').serializeArray();
     settings[0].name = 'myPlex_'+settings[0].name;
     settings[1].name = 'myPlex_'+settings[1].name;
-    $.post(WEBROOT + '/xhr/plex/tutorial_save/',
+    var list = $('#tutorial .inner ul').html();
+    $('#tutorial .inner ul').replaceWith('<img class="loading" src="'+WEBROOT+'/static/images/xhrloading.gif" width="40px" style="margin: 20px 100px;">');
+      $.post(WEBROOT + '/xhr/plex/tutorial_save/',
       { settings: JSON.stringify(settings) }, function(data) {
         if(data.success){
-          $('#tutorial #myPlex_username').parent('li').append('<img src="/static/images/yes.png">');
-          $('#tutorial #myPlex_password').parent('li').append('<img src="/static/images/yes.png">');
-          $.get(WEBROOT+'/xhr/plex/listServers/', function(data) {
-            if(data.success){
-              $('#server_settings .submenu ul').html('');
-              for (var i = 0; i < data.servers.length; i++) {
-                $('#server_settings .submenu ul').append('<li class="switch_server" data-server_id="'+data.servers[i][1]+'">'+data.servers[i][0]+'</li>');
-              }
-            } else {
-              popup_message(data.msg);
-            }
-          });
+          $('#server_settings .submenu ul').html('');
+          $('img.loading').replaceWith('<ul class="servers"></ul>');
+          for (var i = 0; i < data.servers.length; i++) {
+            $('#tutorial .inner ul.servers').append('<li data-server_id="'+data.servers[i][1]+'">'+data.servers[i][0]+'</li>');
+            $('#server_settings .submenu ul').append('<li class="switch_server" data-server_id="'+data.servers[i][1]+'">'+data.servers[i][0]+'</li>');
+          }
+          $('#tutorial .inner p').remove();
+          $('#tutorial .inner h1').text('Plese select your local Plex server:');
         } else {
-          popup_message('Could not save myPlex info: ' + data.msg);
+          $('img.loading').replaceWith('<ul>'+list+'</ul>');
+          popup_message(data.msg);
         }
       }
     );
+  });
+
+  $(document).on('click', '#tutorial ul.servers li', function(){
+    $('#tutorial ul.servers li img').remove();
+    $('#tutorial .inner h2').remove();
+    var el = $(this);
+    var id = $(this).data('server_id');
+    add_loading_gif(el);
+    $.get(WEBROOT+'/xhr/switch_server/'+id, function(data) {
+      if(data.success){
+        el.children('img').attr('src', WEBROOT+'/static/images/yes.png');
+        $('#server_settings .submenu ul li.switch_server').each(function(index, el) {
+          if($(el).data('server_id') == id){
+            $(el).addClass('active');
+          } else {
+            $(el).removeClass('active');
+          }
+        });
+        $('#tutorial .inner').append('<h2>Your plex account is now set up.</h2>'+
+          '<h2>Hover over the top left to start customizing Maraschino.</h2>'+
+          '<h2>Hover over the top right to change server settings.</h2>');
+      } else {
+        el.children('img').attr('src', WEBROOT+'/static/images/no.png');
+        popup_message(data.msg);
+      }
+    });
   });
 
   $(document).on('click', 'div#plex.module .plexMenu li, #plex ul.list li', function(){
@@ -305,7 +330,7 @@ $(document).ready(function() {
       var li = $(this);
 
       $.get(WEBROOT + '/xhr/switch_server/' + $(this).data('server_id'), function(data) {
-        if (data.status === 'error') {
+        if (!data.success) {
           popup_message('There was an error switching Plex servers.');
           return;
         }

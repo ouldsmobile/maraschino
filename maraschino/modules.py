@@ -876,8 +876,12 @@ def module_settings_save(name):
     if name == 'server_settings':
         return extra_settings_dialog(dialog_type='server_settings', updated=True)
     elif name == 'plex':
-        from maraschino.noneditable import updatePlexInfo
-        updatePlexInfo()
+        from maraschino.noneditable import populatePlexServers
+        try:
+            populatePlexServers()
+        except:
+            logger.log('Plex :: Failed to populate servers with new credentials', 'ERROR')
+
 
     # for everything else, return the rendered module
 
