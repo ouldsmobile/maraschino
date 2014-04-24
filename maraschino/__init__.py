@@ -157,10 +157,8 @@ def initialize():
 
 def init_updater():
     from maraschino.updater import checkGithub, gitCurrentVersion
-    from maraschino.noneditable import updatePlexInfo
     global USE_GIT, CURRENT_COMMIT, COMMITS_BEHIND
 
-    threading.Thread(target=updatePlexInfo).start()
     if UPDATER:
         if os.name == 'nt':
             USE_GIT = False
@@ -185,9 +183,7 @@ def start_schedules():
     if UPDATER:
         # check every 6 hours for a new version
         from maraschino.updater import checkGithub
-        from maraschino.noneditable import updatePlexInfo
         SCHEDULE.add_interval_job(checkGithub, hours=6)
-        SCHEDULE.add_interval_job(updatePlexInfo, hours=6)
     SCHEDULE.start()
 
 
