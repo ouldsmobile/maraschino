@@ -142,10 +142,7 @@ $(document).ready(function() {
 
   // currently playing
 
-  var currently_playing = setTimeout(function() {
-      get_currently_playing();
-    }, 5000
-  );
+  var currently_playing = get_currently_playing();
 
   function get_currently_playing() {
     $.get(WEBROOT + '/xhr/plex/now_playing/', function(data) {

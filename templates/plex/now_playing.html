@@ -9,6 +9,7 @@
         <span>({{item['@year']}})</span>
       {% endif %}
       <span class="user">{{ item['User']['@title'] }}</span>
+      <span class="progress" style="width: {{ (item['@viewOffset']|int / item['@duration']|int) * 100 }}%;"></span>
     </div>
   </div>
 {%- endmacro %}
