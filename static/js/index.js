@@ -178,7 +178,7 @@ $(document).ready(function() {
       if(data.success){
         setTimeout(get_currently_playing(), 300);
       } else {
-        popup_message('Error');
+        popup_message('Cannot control this type of client!');
       }
     });
   });
