@@ -3,7 +3,7 @@ from jinja2.filters import FILTERS
 from maraschino import app, logger, RUNDIR, WEBROOT
 from maraschino.tools import requires_auth, get_setting_value
 from maraschino.models import PlexServer as dbserver
-from plexLib import PlexServer
+from plexLib import PlexServer, PlexClient
 import StringIO
 
 
@@ -196,3 +196,41 @@ def xhr_plex_now_playing():
         return jsonify({'playing': False})
 
 
+@app.route('/xhr/plex/client/<machineIdentifier>/<command>/')
+def xhr_plex_client(machineIdentifier, command):
+    """
+    play
+    pause
+    stop
+    skipNext
+    skipPrevious
+    stepForward
+    stepBack
+    setParameters?volume=[0, 100]&shuffle=0/1&repeat=0/1/2
+    setStreams?audioStreamID=X&subtitleStreamID=Y&videoStreamID=Z
+    seekTo?offset=XXX` - Offset is measured in milliseconds
+    skipTo?key=X` - Playback skips to item with matching key
+    playMedia` now accepts key, offset, machineIdentifier
+    """
+    try:
+        p, s = getActiveServer()
+        clients = p.devices()
+        # print clients['@MediaContainer']
+        list = []
+        player = None
+        if int(clients['MediaContainer']['@size']) is 1:
+            player = None
+        else:
+            for client in clients['MediaContainer']['Server']:
+                list.append(client)
+                if client['@machineIdentifier'] == machineIdentifier:
+                    player = PlexClient(ip=client['@address'], port=int(client['@port']))
+                    break
+
+        response = player.playback(command)['Response']
+        if 'OK' in response['@status']:
+            return jsonify(success=True)
+    except:
+        pass
+
+    return jsonify(success=False)

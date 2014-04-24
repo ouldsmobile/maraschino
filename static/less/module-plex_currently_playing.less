@@ -17,6 +17,30 @@
     overflow: hidden;
     float: left;
     margin: 0px 10px;
+    cursor: pointer;
+
+    &::after
+    {
+      background-size: 20px;
+      opacity: 0.4;
+      background-repeat:no-repeat;
+      content: "";
+      height: 30px;
+      width: 30px;
+      position: absolute;
+      top: 40%;
+    }
+
+    &.playing::after
+    {
+      background-image: url('/@{webroot}/images/play.png');
+    }
+
+    &.paused::after
+    {
+      background-image: url('/@{webroot}/images/pause.png');
+    }
+
 
     &.episode,
     &.track,
@@ -24,12 +48,18 @@
     {
       height: 100px;
       bottom: 50px;
+      &::after{
+        right: 40%;
+      }
     }
 
     &.movie
     {
       height: 150px;
       bottom: 100px;
+      &::after{
+        right: 30%;
+      }
     }
 
     img

@@ -1,5 +1,5 @@
 {% macro video(item) -%}
-  <div class="player {{item['@type']}}" title="@{{item['Player']['@title']}}">
+  <div class="player {{item['@type']}} {{ item['Player']['@state'] }}" title="@{{item['Player']['@title']}}" data-player_id="{{ item['Player']['@machineIdentifier'] }}">
     <img src="{{ item['@thumb']|plex_img }}">
     <div class="info">
       {% if 'episode' in item['@type'] %}

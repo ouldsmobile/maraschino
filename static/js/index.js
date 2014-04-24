@@ -171,6 +171,17 @@ $(document).ready(function() {
     });
   }
 
+  $(document).on('click', '#currently_playing div.player', function(){
+    var el = $(this);
+    id = el.data('player_id');
+    $.get(WEBROOT + '/xhr/plex/client/'+id+'/play/', function(data) {
+      if(data.success){
+        setTimeout(get_currently_playing(), 300);
+      } else {
+        popup_message('Error');
+      }
+    });
+  });
 
   // post trakt shout
 

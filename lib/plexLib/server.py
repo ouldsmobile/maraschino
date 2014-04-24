@@ -135,3 +135,7 @@ class PlexServer(object):
         return self.query(self.buildURL('status/sessions'))
 
 
+    def devices(self):
+        return self.query(self.buildURL('clients'))
+
+
