@@ -1,141 +1,269 @@
-import urllib2, base64, sys, platform
-sys.path.append("..")
-from xmltodict import xmltodict
+from helper import *
 
+class Server(object):
 
-class PlexServer(object):
-
-    def __init__(self, ip=None, port=32400, username=None, password=None, token=None, scheme="http://"):
-        self.ip = ip
-        self.port = port
-        self.username = username
-        self.password = password
-        self.token = token
-        self.scheme = scheme
-
+    def __init__(self, ip, token=None, port=32400, scheme="http://"):
+        self.__ip = ip
+        self.__port = port
+        self.__token = token
+        self.__scheme = scheme
+        self.__sections = None
 
     def __str__(self):
-        return "<PlexServer: %s:%d/>" % (self.ip, self.port)
-
+        return "<Plex Server: %s%s:%s/>" % (self.__scheme, self.__ip, self.__port)
 
     def __repr__(self):
-        return "<PlexServer: %s:%d/>" % (self.ip, self.port)
-
+        return "<Plex Server: %s%s:%s/>" % (self.__scheme, self.__ip, self.__port)
 
     def setIp(self, ip):
-        self.ip = ip
-
+        self.__ip = ip
 
     def setPort(self, port):
-        self.port = port
-
+        self.__port = port
 
     def setPassword(self, password):
-        self.password = password
-
+        self.__password = password
 
     def setUsername(self, username):
-        self.username = username
-
+        self.__username = username
 
     def setToken(self, token):
-        self.token = token
-
+        self.__token = token
 
     def setScheme(self, scheme):
-        self.scheme = scheme
+        self.__scheme = scheme
+
+    def sections(self, force=False):
+        if self.__sections is None or force is True:
+            self.__getSections()
+
+        return self.__sections
+
+    def getXML(self, path, args=None, raw=False):
+        baseURL = "%s%s:%s" % (self.__scheme, self.__ip, self.__port)
+
+        if debug:
+            print baseURL, path, self.__token
+
+        XML = getXMLFromPMS(baseURL, path, args, self.__token, raw)
+        if raw:
+            return XML
+
+        if not XML:
+            return False
+
+        return XML
+
+    def __getSections(self):
+        path = "/library/sections"
+        XML = self.getXML(path)
+
+        sections = []
+        for section in XML.findall('Directory'):
+            sectionToAdd = dict()
+            for attr in section.attrib:
+                sectionToAdd[str(attr)] = section.attrib[attr].encode('ascii', 'ignore')
+
+            sections.append(sectionToAdd)
+
+        self.__sections = sections
+        return sections
 
 
-    def buildURL(self, path, params=""):
-        return "%s%s?X-Plex-Token=%s&%s" % (self.address(), path, self.token, params)
+    def image(self, path):
+        if path.startswith('/'):
+            path = path[1:]
 
+        xargs = {}
+        xargs['X-Plex-Token'] = self.__token
+        url = "%s%s:%s/%s" % (self.__scheme, self.__ip, self.__port, path)
 
-    def address(self):
-        return "%s%s:%s/" % (self.scheme, self.ip, self.port)
-
-
-    def query(self, url):
         try:
-            r = urllib2.Request(url)
-            r = urllib2.urlopen(r, None, 20)
-            return xmltodict.parse(r.read())
-        except urllib2.URLError, e:
+            r = urllib2.Request(url, None, xargs)
+            r = urllib2.urlopen(r)
+            return r.read()
+        except:
             raise e
+
+
+    def onDeck(self):
+        path = "/library/onDeck"
+
+        XML = self.getXML(path)
+        if not XML:
+            return False
+
+        items = []
+        for item in XML.findall('Video'):
+            itemToAdd = dict()
+            for attr in item.attrib:
+                itemToAdd[str(attr)] = item.attrib[attr].encode('ascii', 'ignore')
+
+            items.append(itemToAdd)
+
+        return items
+
+
+    def section(self, id):
+        path = "/library/sections/%s/all" % id
+        XML = self.getXML(path)
+        if not XML:
+            return False
+
+        items = {}
+        for attr in XML.getroot().attrib:
+            items[attr] = XML.getroot().attrib[attr]
+
+        videos = []
+        for item in XML.findall('Video'):
+            itemToAdd = dict()
+            for attr in item.attrib:
+                itemToAdd[str(attr)] = item.attrib[attr].encode('ascii', 'ignore')
+
+            videos.append(itemToAdd)
+
+        directories = []
+        for item in XML.findall('Directory'):
+            itemToAdd = dict()
+            for attr in item.attrib:
+                itemToAdd[str(attr)] = item.attrib[attr].encode('ascii', 'ignore')
+
+            directories.append(itemToAdd)
+
+        photos = []
+        for item in XML.findall('Photo'):
+            itemToAdd = dict()
+            for attr in item.attrib:
+                itemToAdd[str(attr)] = item.attrib[attr].encode('ascii', 'ignore')
+
+            photos.append(itemToAdd)
+
+        items['Video'] = videos
+        items['Directory'] = directories
+        items['Photo'] = photos
+
+        return items
+
+
+    def recentlyAdded(self, id, start=0, size=5):
+        path = "/library/sections/%s/recentlyAdded" % id
+        options = {'X-Plex-Container-Start': start, 'X-Plex-Container-Size': size}
+        XML = self.getXML(path, args=options)
+        if not XML:
+            return False
+
+        items = {}
+        for attr in XML.getroot().attrib:
+            items[attr] = XML.getroot().attrib[attr]
+
+        videos = []
+        for item in XML.findall('Video'):
+            itemToAdd = dict()
+            for attr in item.attrib:
+                itemToAdd[str(attr)] = item.attrib[attr].encode('ascii', 'ignore')
+
+            videos.append(itemToAdd)
+
+        directories = []
+        for item in XML.findall('Directory'):
+            itemToAdd = dict()
+            for attr in item.attrib:
+                itemToAdd[str(attr)] = item.attrib[attr].encode('ascii', 'ignore')
+
+            directories.append(itemToAdd)
+
+        photos = []
+        for item in XML.findall('Photo'):
+            itemToAdd = dict()
+            for attr in item.attrib:
+                itemToAdd[str(attr)] = item.attrib[attr].encode('ascii', 'ignore')
+
+            photos.append(itemToAdd)
+
+        items['Video'] = videos
+        items['Directory'] = directories
+        items['Photo'] = photos
+
+        return items
+
+
+    def refreshSection(self, id):
+        path = "/library/sections/%s/refresh" % id
+        try:
+            response = self.getXML(path, raw=True)
+            if response.getcode() is 200:
+                return True
+        except:
+            pass
 
         return False
 
 
-    def getServers(self):
-        try:
-            r = urllib2.Request("https://plex.tv/pms/servers.xml")
-            base64string = base64.encodestring('%s:%s' % (self.username, self.password)).replace('\n', '')
-            r.add_header("Authorization", "Basic %s" % base64string)
-            r = urllib2.urlopen(r)
-            el = xmltodict.parse(r.read())
-            return el['MediaContainer']
-        except urllib2.URLError:
-            raise
-
-
-    def getToken(self):
-        try:
-            system = str(platform.system())
-            if 'Darwin' in system:
-                system = 'MacOSX'
-            r = urllib2.Request("https://my.plexapp.com/users/sign_in.xml", data="")
-            base64string = base64.encodestring('%s:%s' % (self.username, self.password)).replace('\n', '')
-            r.add_header("Authorization", "Basic %s" % base64string)
-            r.add_header("X-Plex-Client-Identifier", str(platform.node()))
-            r.add_header('X-Plex-Platform', system)
-            r.add_header('X-Plex-Platform-Version', str(platform.release()))
-            r.add_header('X-Plex-Product', 'Maraschino')
-            r.add_header('X-Plex-Product-Version', ':D')
-            r.add_header('X-Plex-Device', str(platform.node()))
-            r.add_header('X-Plex-Device-Name', 'Web Frontend')
-            r.add_header('X-Plex-Model', ':-) :)')
-            r = urllib2.urlopen(r)
-            el = xmltodict.parse(r.read())
-            return el['user']['@authenticationToken']
-        except urllib2.URLError:
-            raise
-
-
-    def image(self, path):
-        try:
-            r = urllib2.Request(self.buildURL(path))
-            r = urllib2.urlopen(r)
-            return r.read()
-        except urllib2.URLError, e:
-            raise e
-
-    def onDeck(self):
-        return self.query(self.buildURL('library/onDeck'))
-
-
-    def recentlyAdded(self, section=None, params=""):
-        if section:
-            return self.query(self.buildURL('library/sections/%s/recentlyAdded' % (section), params))
-
-        return self.query(self.buildURL('library/recentlyAdded', params))
-
-
-    def sections(self):
-        return self.query(self.buildURL('library/sections'))
-
-
-    def getSection(self, id):
-        return self.query(self.buildURL('library/sections/%s/all' % id))
-
-
-    def refreshSection(self, id):
-        return self.query(self.buildURL('library/section/%s/refresh' % id))
-
-
     def nowPlaying(self):
-        return self.query(self.buildURL('status/sessions'))
+        path = "/status/sessions"
+        XML = self.getXML(path)
 
+        items = {}
+        for attr in XML.getroot().attrib:
+            items[attr] = XML.getroot().attrib[attr]
 
-    def devices(self):
-        return self.query(self.buildURL('clients'))
+        videos = []
+        for item in XML.findall('Video'):
+            itemToAdd = dict()
+            for attr in item.attrib:
+                itemToAdd[str(attr)] = item.attrib[attr].encode('ascii', 'ignore')
+            for child in item:
+                itemToAdd[child.tag] = child.attrib
+            videos.append(itemToAdd)
 
+        directories = []
+        for item in XML.findall('Directory'):
+            itemToAdd = dict()
+            for attr in item.attrib:
+                itemToAdd[str(attr)] = item.attrib[attr].encode('ascii', 'ignore')
+            for child in item:
+                itemToAdd[child.tag] = child.attrib
+
+            directories.append(itemToAdd)
+
+        photos = []
+        for item in XML.findall('Photo'):
+            itemToAdd = dict()
+            for attr in item.attrib:
+                itemToAdd[str(attr)] = item.attrib[attr].encode('ascii', 'ignore')
+            for child in item:
+                itemToAdd[child.tag] = child.attrib
+
+            photos.append(itemToAdd)
+
+        tracks = []
+        for item in XML.findall('Track'):
+            itemToAdd = dict()
+            for attr in item.attrib:
+                itemToAdd[str(attr)] = item.attrib[attr].encode('ascii', 'ignore')
+            for child in item:
+                itemToAdd[child.tag] = child.attrib
+
+            tracks.append(itemToAdd)
+
+        items['Video'] = videos
+        items['Directory'] = directories
+        items['Photo'] = photos
+        items['Track'] = tracks
+
+        return items
+
+    def clients(self):
+        path = "/clients"
+        XML = self.getXML(path)
+
+        servers = []
+        for server in XML.findall('Server'):
+            serverToAdd = dict()
+            for attr in server.attrib:
+                serverToAdd[str(attr)] = server.attrib[attr].encode('ascii', 'ignore')
+
+            servers.append(serverToAdd)
+
+        return servers
 
