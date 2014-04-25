@@ -314,8 +314,11 @@ $(document).ready(function() {
     request.error(function() {
       css_error_image(el);
     });
-    request.success(function() {
-      css_success_image(el);
+    request.success(function(data) {
+      if(data.sucess)
+        css_success_image(el);
+      else
+        css_error_image(el);
     });
   });
 
@@ -364,7 +367,7 @@ $(document).ready(function() {
   $(document).on('change', 'div[id*="plex_recent"] #settings select', function(){
     var type = $(this).attr('id');
     var val = $(this).val();
-    $.get(WEBROOT+'/xhr/plex/saveSection/'+type+'/'+val+'/', function(data) {
+    $.get(WEBROOT+'/xhr/plex/section/save/'+type+'/'+val+'/', function(data) {
       if(!data.success){
         popup_message(data.msg);
       }

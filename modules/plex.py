@@ -2,8 +2,8 @@ from flask import render_template, jsonify, send_file
 from jinja2.filters import FILTERS
 from maraschino import app, logger, RUNDIR, WEBROOT
 from maraschino.tools import requires_auth, get_setting_value
-from maraschino.models import PlexServer as dbserver
-from plexLib import PlexServer, PlexClient
+from maraschino.models import PlexServer
+from plexLib import Server, Client
 import StringIO
 
 
@@ -17,12 +17,6 @@ def error(e, module='plex'):
 
 def plex_log(msg, level='INFO'):
     logger.log('Plex :: %s'%(msg), level)
-
-
-def getActiveServer():
-    selected_server = get_setting_value('active_server')
-    server = dbserver.query.filter(dbserver.id == selected_server).first()
-    return PlexServer(ip=server.localAddresses, token=server.token), server
 
 
 def plex_image(path):
@@ -39,20 +33,23 @@ def plex():
 @app.route('/xhr/plex/onDeck/')
 def xhr_on_deck():
     try:
-        p, s = getActiveServer()
+        server = PlexServer.query.filter(PlexServer.id == get_setting_value('active_server')).first()
+        p = Server(ip=server.localAddresses, token=server.token)
         onDeck = p.onDeck()
 
         return render_template('plex/on_deck.html',
-            server=s,
-            video=onDeck['MediaContainer'],
+            server=server,
+            video=onDeck,
         )
     except Exception as e:
         return error(e)
 
 
 @app.route('/xhr/plex_recent_<title>/')
+@app.route('/xhr/plex_recent_<title>/<int:start>/<int:size>/')
 @app.route('/xhr/plex_recent_<title>/<int:id>/')
-def xhr_recent_movies(title, id=None):
+@app.route('/xhr/plex_recent_<title>/<int:id>/<int:start>/<int:size>/')
+def xhr_recent_movies(title, id=None, start=0, size=5):
     if 'movies' in title:
         type = 'movie'
     elif 'episodes' in title:
@@ -63,69 +60,68 @@ def xhr_recent_movies(title, id=None):
         type = 'photo'
 
     try:
-        p, s = getActiveServer()
-        preferred = s.sections[type]['preferred']
+        server = PlexServer.query.filter(PlexServer.id == get_setting_value('active_server')).first()
+        p = Server(ip=server.localAddresses, token=server.token)
+        preferred = server.sections[type]['preferred']
         if id is None:
             # if no explicit id, try to get preferred id
             id = preferred
             # if preferred id is 0 there is no preferred, select the first one in db
             if id is 0:
-                for section in s.sections:
+                for section in server.sections:
                     if type in section:
-                        id=s.sections[section]['sections'][0]['key']
+                        id=server.sections[section]['sections'][0]['key']
                         break
 
         # this might fail if preffered section id no longer exists so default back to one in db
         try:
-            recentlyAdded = p.recentlyAdded(section=id, params="X-Plex-Container-Start=0&X-Plex-Container-Size=5")
+            recentlyAdded = p.recentlyAdded(id=id, start=start, size=size)
         except:
-            for section in s.sections:
+            for section in server.sections:
                 if type in section:
-                    id=s.sections[section]['sections'][0]['key']
+                    id=server.sections[section]['sections'][0]['key']
                     break
-            recentlyAdded = p.recentlyAdded(section=id, params="X-Plex-Container-Start=0&X-Plex-Container-Size=5")
+            recentlyAdded = p.recentlyAdded(id=id, start=start, size=size)
 
         # perform rounding of rating to one decimal place for movies template
         if 'movies' in title:
-            for movie in recentlyAdded['MediaContainer']['Video']:
+            for movie in recentlyAdded['Video']:
                 try:
-                    movie['@rating'] = round(float(movie['@rating']), 1)
+                    movie['rating'] = round(float(movie['rating']), 1)
                 except:
                     pass
+    except Exception, e:
+        return error(e, module="plex_recent_%s" % title)
 
-        return render_template('plex/recent.html',
-            type=type,
-            id=int(id),
-            title=title,
-            server=s,
-            items=recentlyAdded['MediaContainer'],
-            preferred=preferred,
-        )
-    except Exception as e:
-        plex_log(e, 'ERROR')
-        return error(e, module="plex_recent_movies")
+
+    return render_template('plex/recent.html',
+        type=type,
+        id=int(id),
+        title=title,
+        server=server,
+        items=recentlyAdded,
+        preferred=preferred,
+    )
 
 
 @app.route('/xhr/plex/section/<int:id>/')
 def xhr_plex_section(id):
-    try:
-        p, s = getActiveServer()
-        items = p.getSection(id)
-        return render_template('plex/library_section.html',
-            server=s,
-            media=items['MediaContainer'],
-        )
-    except Exception as e:
-        return error(e)
+    server = PlexServer.query.filter(PlexServer.id == get_setting_value('active_server')).first()
+    p = Server(ip=server.localAddresses, token=server.token)
+    items = p.section(id)
+    return render_template('plex/library_section.html',
+        server=server,
+        media=items,
+    )
 
 
 @app.route('/xhr/plex/sections/<label>/')
 def xhr_plex_sections(label):
     try:
-        p, s = getActiveServer()
-        sections = s.sections[label]
+        server = PlexServer.query.filter(PlexServer.id == get_setting_value('active_server')).first()
+        sections = server.sections[label]
         return render_template('plex/library_list.html',
-            server=s,
+            server=server,
             sections=sections,
         )
     except Exception as e:
@@ -135,9 +131,10 @@ def xhr_plex_sections(label):
 @app.route('/xhr/plex/refresh/<int:id>/')
 def xhr_plex_refresh(id):
     try:
-        p, server = getActiveServer()
+        server = PlexServer.query.filter(PlexServer.id == get_setting_value('active_server')).first()
+        p = Server(ip=server.localAddresses, token=server.token)
         p = p.refreshSection(id)
-        return jsonify({'success': True, 'response': p})
+        return jsonify({'success': p})
     except:
         return jsonify({'success': False})
 
@@ -150,7 +147,8 @@ def xhr_plex_image(path=''):
         img = RUNDIR + 'static/images/applications/Plex.png'
         return send_file(img, mimetype='image/jpeg')
 
-    p, server = getActiveServer()
+    server = PlexServer.query.filter(PlexServer.id == get_setting_value('active_server')).first()
+    p = Server(ip=server.localAddresses, token=server.token)
 
     try:
         img = StringIO.StringIO(p.image(path))
@@ -163,74 +161,54 @@ def xhr_plex_image(path=''):
 @app.route('/xhr/plex/now_playing/')
 def xhr_plex_now_playing():
     try:
-        p, s = getActiveServer()
+        server = PlexServer.query.filter(PlexServer.id == get_setting_value('active_server')).first()
+        p = Server(ip=server.localAddresses, token=server.token)
         clients = p.nowPlaying()
-        if int(clients['MediaContainer']['@size']) == 0:
-            return jsonify({ 'playing': False })
+        if int(clients['size']) == 0:
+            return jsonify(playing=False)
 
         videos = None
         songs = None
         photos = None
         try:
-            videos = clients['MediaContainer']['Video']
+            videos = clients['Video']
         except:
             pass
 
         try:
-            songs = clients['MediaContainer']['Track']
+            songs = clients['Track']
         except:
             pass
 
         try:
-            photos = clients['MediaContainer']['Photo']
+            photos = clients['Photo']
         except:
             pass
 
         return render_template('plex/now_playing.html',
-            server=s,
+            server=server,
             videos=videos,
             songs=songs,
             photos=photos,
         )
     except:
-        return jsonify({'playing': False})
+        return jsonify(playing=False, reason='Error')
 
 
 @app.route('/xhr/plex/client/<machineIdentifier>/<command>/')
 def xhr_plex_client(machineIdentifier, command):
-    """
-    play
-    pause
-    stop
-    skipNext
-    skipPrevious
-    stepForward
-    stepBack
-    setParameters?volume=[0, 100]&shuffle=0/1&repeat=0/1/2
-    setStreams?audioStreamID=X&subtitleStreamID=Y&videoStreamID=Z
-    seekTo?offset=XXX` - Offset is measured in milliseconds
-    skipTo?key=X` - Playback skips to item with matching key
-    playMedia` now accepts key, offset, machineIdentifier
-    """
     try:
-        p, s = getActiveServer()
-        clients = p.devices()
-        # print clients['@MediaContainer']
-        list = []
-        player = None
-        if int(clients['MediaContainer']['@size']) is 1:
-            player = None
-        else:
-            for client in clients['MediaContainer']['Server']:
-                list.append(client)
-                if client['@machineIdentifier'] == machineIdentifier:
-                    player = PlexClient(ip=client['@address'], port=int(client['@port']))
-                    break
+        server = PlexServer.query.filter(PlexServer.id == get_setting_value('active_server')).first()
+        p = Server(ip=server.localAddresses, token=server.token)
+        clients = p.clients()
+        for client in clients:
+            if client['machineIdentifier'] == machineIdentifier:
+                player = Client(ip=client['address'], port=client['port'], token=get_setting_value('myPlex_token'))
+                break
 
-        response = player.playback(command)['Response']
-        if 'OK' in response['@status']:
+
+        response = player.play()
+        if 'OK' in response:
             return jsonify(success=True)
     except:
-        pass
-
-    return jsonify(success=False)
+        return jsonify(success=False)

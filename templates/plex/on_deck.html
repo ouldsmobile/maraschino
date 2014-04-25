@@ -3,13 +3,13 @@
 {% block content %}
 <h2>Plex OnDeck</h2>
 <div class="onDeck">
-    {% for x in video['Video'] %}
-        <a class="poster" href="http://plex.tv/web/app#!/server/{{id}}/details/{{x['@key']|replace('/', '%2F')}}" target="_blank">
-            {% if "episode" in x['@type'] %}
-                    <img src="{{x['@grandparentThumb']|plex_img}}">
-                    <p>{{x['@parentIndex']}}x{{x['@index']}}</p>
+    {% for x in video %}
+        <a class="poster" href="http://plex.tv/web/app#!/server/{{id}}/details/{{x['key']|replace('/', '%2F')}}" target="_blank">
+            {% if "episode" in x['type'] %}
+                    <img src="{{x['grandparentThumb']|plex_img}}">
+                    <p>{{x['parentIndex']}}x{{x['index']}}</p>
             {% else %}
-                    <img src="{{ x['@thumb']|plex_img}}">
+                    <img src="{{ x['thumb']|plex_img}}">
             {% endif %}
         </a>
     {% endfor %}

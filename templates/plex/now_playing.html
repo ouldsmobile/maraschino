@@ -1,67 +1,55 @@
 {% macro video(item) -%}
-  <div class="player {{item['@type']}} {{ item['Player']['@state'] }}" title="@{{item['Player']['@title']}}" data-player_id="{{ item['Player']['@machineIdentifier'] }}">
-    <img src="{{ item['@thumb']|plex_img }}">
+  <div class="player {{item['type']}} {{ item['Player']['state'] }}" title="@{{item['Player']['title']}}" data-player_id="{{ item['Player']['machineIdentifier'] }}">
+    <img src="{{ item['thumb']|plex_img }}">
     <div class="info">
-      {% if 'episode' in item['@type'] %}
-        <span>{{ item['@grandparentTitle'] }} - {{item['@parentIndex']}}x{{item['@index']}}</span>
+      {% if 'episode' in item['type'] %}
+        <span>{{ item['grandparentTitle'] }} - {{item['parentIndex']}}x{{item['index']}}</span>
       {% else %}
-        <span>{{ item['@title'] }}</span>
-        <span>({{item['@year']}})</span>
+        <span>{{ item['title'] }}</span>
+        <span>({{item['year']}})</span>
       {% endif %}
-      <span class="user">{{ item['User']['@title'] }}</span>
-      <span class="progress" style="width: {{ (item['@viewOffset']|int / item['@duration']|int) * 100 }}%;"></span>
+      <span class="user">{{ item['User']['title'] }}</span>
+      <span class="progress" style="width: {{ (item['viewOffset']|int / item['duration']|int) * 100 }}%;"></span>
     </div>
   </div>
 {%- endmacro %}
 {% macro song(item) -%}
-  <div class="player {{item['@type']}}" title="@{{item['Player']['@title']}}">
-    <img src="{{ item['@thumb']|plex_img }}">
+  <div class="player {{item['type']}}" title="@{{item['Player']['title']}}">
+    <img src="{{ item['thumb']|plex_img }}">
     <div class="info">
-      <span>{{ item['@title'] }}</span>
-      <span>{{ item['@grandparentTitle'] }}</span>
-      <span>{{ item['@parentTitle'] }}</span>
-      <span>Track {{ item['@index'] }}</span>
-      <span class="user">{{ item['User']['@title'] }}</span>
+      <span>{{ item['title'] }}</span>
+      <span>{{ item['grandparentTitle'] }}</span>
+      <span>{{ item['parentTitle'] }}</span>
+      <span>Track {{ item['index'] }}</span>
+      <span class="user">{{ item['User']['title'] }}</span>
     </div>
   </div>
 {%- endmacro %}
 {% macro photo(item) -%}
-  <div class="player {{item['@type']}}" title="@{{item['Player']['@title']}}">
-    <img src="{{ item['@thumb']|plex_img }}">
+  <div class="player {{item['type']}}" title="@{{item['Player']['title']}}">
+    <img src="{{ item['thumb']|plex_img }}">
     <div class="info">
-      <span>{{ item['@title'] }}</span>
-      <span>{{ item['@year'] }}</span>
-      <span class="user">{{ item['User']['@title'] }}</span>
+      <span>{{ item['title'] }}</span>
+      <span>{{ item['year'] }}</span>
+      <span class="user">{{ item['User']['title'] }}</span>
     </div>
   </div>
 {%- endmacro %}
 
 <div id="currently_playing">
   {% if videos %}
-    {% if videos['@type'] %}
-      {{ video(videos) }}
-    {% else %}
-      {% for item in videos %}
-        {{ video(item) }}
-      {% endfor %}
-    {% endif %}
+    {% for item in videos %}
+      {{ video(item) }}
+    {% endfor %}
   {% endif %}
   {% if songs %}
-    {% if songs['@type'] %}
-      {{ song(songs) }}
-    {% else %}
-      {% for item in songs %}
-        {{ song(item) }}
-      {% endfor %}
-    {% endif %}
+    {% for item in songs %}
+      {{ song(item) }}
+    {% endfor %}
   {% endif %}
   {% if photos %}
-    {% if photos['@type'] %}
-      {{ photo(photos) }}
-    {% else %}
-      {% for item in photos %}
-        {{ photo(item) }}
-      {% endfor %}
-    {% endif %}
+    {% for item in photos %}
+      {{ photo(item) }}
+    {% endfor %}
   {% endif %}
 </div>
