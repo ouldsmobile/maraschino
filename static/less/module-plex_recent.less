@@ -58,6 +58,39 @@
         }
     }
 
+    div.navigate
+    {
+        width: 99%;
+        height: 15px;
+        padding: 2px;
+        span
+        {
+            width: 49%;
+            height: 15px;
+            line-height: 15px;
+            text-align: center;
+            padding: 1px;
+            background: url('/@{webroot}/images/alpha/fff_10.png');
+            .border-radius(4px);
+            cursor: pointer;
+
+            &.next
+            {
+                float: right;
+            }
+
+            &.previous
+            {
+                float: left;
+            }
+
+            &:hover
+            {
+                background: url('/@{webroot}/images/alpha/fff_20.png');
+            }
+        }
+    }
+
 }
 
 .f_settings_mode div[id*="plex_recent"]

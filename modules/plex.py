@@ -97,6 +97,7 @@ def xhr_recent_movies(title, id=None, start=0, size=5):
     return render_template('plex/recent.html',
         type=type,
         id=int(id),
+        start=start,
         title=title,
         server=server,
         items=recentlyAdded,

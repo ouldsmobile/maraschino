@@ -374,6 +374,23 @@ $(document).ready(function() {
     });
   });
 
+  $(document).on('click', 'div[id*="plex_recent"] div.navigate span', function(event) {
+    var parent = $(this).parent('div.navigate');
+    var type = parent.data('type');
+    var start = parent.data('position');
+    var id = parent.data('id');
+    if($(this).hasClass('previous')){
+      start = start - 5;
+    } else {
+      start = start + 5;
+    }
+    if(start<0)
+      start = 0;
+    $.get(WEBROOT + '/xhr/plex_recent_'+ type +'/'+id+'/'+start+'/5/', function(data){
+      $('div#plex_recent_'+type+'.module').replaceWith($(data));
+    });
+  });
+
   /*** END PLEX ***/
 
   /*** SICKBEARD ***/

@@ -13,12 +13,11 @@
         </select>
     {% endif %}
     <h2>Recently Added {{title|capitalize}}</h2>
-    {% set id = server.machineIdentifier %}
     <ul>
     {% if 'movies' in title %}
         {% for movie in items['Video'] %}
             <li>
-                <a href="http://plex.tv/web/app#!/server/{{id}}/details/{{movie['key']|replace('/', '%2F')}}" target="_blank">
+                <a href="http://plex.tv/web/app#!/server/{{server.machineIdentifier}}/details/{{movie['key']|replace('/', '%2F')}}" target="_blank">
                     <img src="{{ movie['thumb']|plex_img }}">
                     <p>
                         <b>{{ movie['title'] }}</b> <br>
@@ -31,7 +30,7 @@
     {% elif 'episodes' in title %}
         {% for episode in items['Video'] %}
             <li>
-                <a href="http://plex.tv/web/app#!/server/{{id}}/details/{{episode['key']|replace('/', '%2F')}}" target="_blank">
+                <a href="http://plex.tv/web/app#!/server/{{server.machineIdentifier}}/details/{{episode['key']|replace('/', '%2F')}}" target="_blank">
                     <img src="{{ episode['thumb']|plex_img }}">
                     <p>
                         <b>{{episode['grandparentTitle']}}</b> <br>
@@ -44,7 +43,7 @@
     {% elif 'albums' in title %}
         {% for album in items['Directory'] %}
             <li>
-                <a href="http://plex.tv/web/app#!/server/{{id}}/details/{{album['key']|replace('/', '%2F')}}" target="_blank">
+                <a href="http://plex.tv/web/app#!/server/{{server.machineIdentifier}}/details/{{album['key']|replace('/', '%2F')}}" target="_blank">
                     <img src="{{ album['thumb']|plex_img }}">
                     <p>
                         <b>{{ album['title'] }}</b> <br>
@@ -57,7 +56,7 @@
     {% else %}
         {% for photo in items['Photo'] %}
             <li>
-                <a href="http://plex.tv/web/app#!/server/{{id}}/details/{{photo['key']|replace('/', '%2F')}}" target="_blank">
+                <a href="http://plex.tv/web/app#!/server/{{server.machineIdentifier}}/details/{{photo['key']|replace('/', '%2F')}}" target="_blank">
                     <img src="{{ photo['thumb']|plex_img }}">
                     <p>
                         <b>{{ photo['title'] }}</b> <br>
@@ -69,6 +68,10 @@
         {% endfor %}
     {%endif%}
     </ul>
+    <div class="navigate" data-position="{{start}}" data-id="{{id}}" data-type="{{title}}">
+        {% if start > 1 %}<span class="previous">&lt;</span> {% endif %}
+        <span class="next">&gt;</span>
+    </div>
     <div id="settings">
         <span>Default Section:</span>
         <select id="{{type}}">
