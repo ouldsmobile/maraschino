@@ -88,3 +88,23 @@ def indent(elem, level=0):
 def prettyXML(XML):
     indent(XML.getroot())
     return(etree.tostring(XML.getroot()))
+
+def xml_to_dict(root):
+    d = dict()
+    d = root.attrib
+
+    for child in root:
+        if child.tag in d: # if this key already exist in dict then create a list with all the entries
+            l = []
+            if type(d[child.tag]) is dict:
+                l.append(d[child.tag])
+            else:
+                for item in d[child.tag]:
+                    if type(item) is not str:
+                        l.append(item)
+            l.append(xml_to_dict(child))
+            d[child.tag] = l
+        else: # if key does not exist, create dictionary with it's children attributes
+            d[child.tag] = xml_to_dict(child)
+
+    return d

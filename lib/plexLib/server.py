@@ -267,3 +267,8 @@ class Server(object):
 
         return servers
 
+    def metadata(self, id):
+        path = "/library/metadata/%s" % id
+        XML = self.getXML(path)
+        return xml_to_dict(XML.getroot())
+

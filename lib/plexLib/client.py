@@ -68,3 +68,60 @@ class Client(object):
 
     def stepForward(self):
         return self.__playback('stepForward')
+
+    def volume(self, vol):
+        if vol < 101 and vol > -1:
+            return self.__playback('setParameters?volume=%s' % vol)
+
+        return (False, 'Index Out Of Range')
+
+    def __navigation(self, command):
+        """
+        home
+        music
+        moveup
+        movedown
+        moveleft
+        moveright
+        select
+        back
+        """
+        baseURL = "http://%s:%s" % (self.__ip, self.__port)
+        path = "/player/navigation/%s" % command
+
+        if debug:
+            print baseURL, path, self.__token
+
+        XML = getXMLFromPMS(baseURL, path, None, self.__token)
+        if not XML:
+            return False
+
+        root = XML.getroot()
+        if int(root.attrib['code']) is 200:
+            return root.attrib['status']
+
+        return False
+
+    def home(self):
+        return self.__navigation('home')
+
+    def music(self):
+        return self.__navigation('music')
+
+    def up(self):
+        return self.__navigation('moveup')
+
+    def down(self):
+        return self.__navigation('movedown')
+
+    def right(self):
+        return self.__navigation('moveright')
+
+    def left(self):
+        return self.__navigation('moveleft')
+
+    def select(self):
+        return self.__navigation('select')
+
+    def back(self):
+        return self.__navigation('back')
