@@ -1,0 +1,30 @@
+{% extends "plex.html" %}
+
+{% block content %}
+
+{% if item.Video %}
+<h2><a href="http://plex.tv/web/app#!/server/{{server.machineIdentifier}}/details/{{item.Video.key|replace('/', '%2F')}}" target="_blank">{{ item.Video.title }} ({{item.Video.year}})</a></h2>
+<div class="movie clearfix">
+    <img class="thumb" src="{{ item.Video.thumb|plex_img }}" alt="">
+    <h4>{{ item.Video.duration|miliseconds }}</h4>
+    <p class="plot">{{ item.Video.summary }}</p>
+    {% if item.Video.rating %}<p class="rating">{{ item.Video.rating|float|round(1) }}</p>{% endif %}
+    <p>{{item.Video.Media.videoResolution}}p</p>
+    <div class="genres">
+        {% for genre in item.Video.Genre %}
+            <span data-id="{{genre.id}}">{{genre.tag}}</span>
+        {%endfor%}
+    </div>
+    <div class="actors">
+        {% for actor in item.Video.Role %}
+            <span data-id="{{actor.id}}">{{actor.tag}}{% if actor.role %} as {{actor.role}}{%endif%}</span>
+        {%endfor%}
+    </div>
+</div>
+{% elif item.Directory %}
+<div class="tv">
+    {{ item }}
+</div>
+{%endif%}
+
+{% endblock %}

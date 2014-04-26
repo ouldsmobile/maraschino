@@ -359,7 +359,7 @@ $(document).ready(function() {
 
   $(document).on('change', 'select#change_movies, select#change_albums, select#change_episodes, select#change_photos', function(event) {
     var parent = $(this).parent(".module").attr('id');
-    $.get(WEBROOT + '/xhr/'+ parent +'/'+$(this).val(), function(data){
+    $.get(WEBROOT + '/xhr/'+ parent +'/'+$(this).val()+'/', function(data){
       $('div#'+parent+'.module').replaceWith($(data));
     });
   });
@@ -388,6 +388,12 @@ $(document).ready(function() {
       start = 0;
     $.get(WEBROOT + '/xhr/plex_recent_'+ type +'/'+id+'/'+start+'/5/', function(data){
       $('div#plex_recent_'+type+'.module').replaceWith($(data));
+    });
+  });
+
+  $(document).on('click', '#plex .section li', function(event) {
+    $.get(WEBROOT+'/xhr/plex/metadata/'+$(this).data('id'), function(data) {
+      $('#plex').replaceWith(data);
     });
   });
 

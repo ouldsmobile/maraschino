@@ -25,6 +25,15 @@ def plex_image(path):
 FILTERS['plex_img'] = plex_image
 
 
+def miliseconds(ms):
+    hours, minutes = divmod(int(ms)/60000, 60)
+    if hours is 0:
+        return '%i min' % (minutes)
+    return '%i hr %i min' % (hours, minutes)
+
+FILTERS['miliseconds'] = miliseconds
+
+
 @app.route('/xhr/plex/')
 def plex():
     return xhr_on_deck()
@@ -213,3 +222,14 @@ def xhr_plex_client(machineIdentifier, command):
             return jsonify(success=True)
     except:
         return jsonify(success=False)
+
+@app.route('/xhr/plex/metadata/<int:id>/')
+@app.route('/xhr/plex/metadata/<path:id>/')
+def plex_metadata(id):
+    server = PlexServer.query.filter(PlexServer.id == get_setting_value('active_server')).first()
+    p = Server(ip=server.localAddresses, token=server.token)
+    item=p.metadata(id)
+    return render_template('plex/metadata.html',
+        server=server,
+        item=item
+    )

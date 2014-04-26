@@ -5,16 +5,16 @@
 <ul class="section noscroll">
     {% if "show" in media['viewGroup'] %}
         {% for x in media['Directory'] %}
-            <li filter="{{x['title']}}" data-url="{{x['ratingKey']}}">
-                <a href="http://plex.tv/web/app#!/server/{{id}}/details/{{x['key']|replace('/', '%2F')|replace('children', '')}}" target="_blank">
+            <li filter="{{x['title']}}" data-id="{{ x.ratingKey }}">
+                <a href="#">
                     <p>{{ x['title'] }}</p>
                 </a>
             </li>
         {% endfor %}
     {% elif "movie" in media['viewGroup'] %}
         {% for x in media['Video'] %}
-            <li filter="{{x['title']}}" data-url="{{x['key']}}">
-                <a href="http://plex.tv/web/app#!/server/{{id}}/details/{{x['key']|replace('/', '%2F')}}" target="_blank">
+            <li filter="{{x['title']}}" data-id="{{ x.ratingKey }}">
+                <a href="#">
                     <p>{{x['title']}} ({{x['year']}}) </p>
                 </a>
             </li>
