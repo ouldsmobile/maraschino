@@ -1,13 +1,11 @@
 # -*- coding: utf-8 -*-
 """Ressources to use Maraschino on mobile devices"""
 
-import jsonrpclib
-
 from flask import render_template
 from maraschino import app, logger
 
 from maraschino.tools import *
-from maraschino.noneditable import *
+from maraschino.models import Module, PlexServer
 
 global sabnzbd_history_slots
 sabnzbd_history_slots = None
@@ -16,9 +14,14 @@ sabnzbd_history_slots = None
 @app.route('/mobile/')
 @requires_auth
 def mobile_index():
+    plex = True
     available_modules = Module.query.order_by(Module.position)
+    servers = PlexServer.query.order_by(PlexServer.id)
+    if servers.count() == 0:
+        plex = False
 
     return render_template('mobile/index.html',
+        plex=plex,
         available_modules=available_modules,
         search=get_setting_value('search') == '1',
     )
@@ -771,8 +774,8 @@ def start_script(script_id):
     file_ext = os.path.splitext(script.script)[1]
 
     if (file_ext == '.py'):
-        if (script.updates == 1):        
-            #these are extra parameters to be passed to any scripts ran, so they 
+        if (script.updates == 1):
+            #these are extra parameters to be passed to any scripts ran, so they
             #can update the status if necessary
             extras = '--i "%s" --p "%s" --s "%s" --w "%s"' % (host, port, script.id, webroot)
 
@@ -807,4 +810,4 @@ def start_script(script_id):
     db_session.add(script)
     db_session.commit()
 
-    return script_launcher()  
+    return script_launcher()

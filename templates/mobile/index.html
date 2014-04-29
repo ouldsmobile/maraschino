@@ -3,8 +3,8 @@
 {% block content %}
 
 <ul data-role="listview">
-    {% if xbmc %}<li><a href="{{ url_for('xbmc') }}">XBMC</a></li>{% endif %}
-
+<!--     {% if plex %}<li><a href="{{ url_for('plex') }}">Plex</a></li>{% endif %}
+ -->
     {% for module in available_modules %}
         {% if 'sickbeard' in module.name %}<li><a href="{{ url_for('sickbeard') }}">Sickbeard</a></li>{% endif %}
         {% if 'couchpotato' in module.name %}<li><a href="{{ url_for('couchpotato') }}">CouchPotato</a></li>{% endif %}

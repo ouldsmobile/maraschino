@@ -63,6 +63,7 @@ def import_modules():
     import modules.updater
     import modules.utorrent
     import modules.weather
+    import mobile
 
 
 @app.teardown_request
