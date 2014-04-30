@@ -6,10 +6,10 @@
     {% for x in video %}
         <a class="poster" href="http://plex.tv/web/app#!/server/{{id}}/details/{{x['key']|replace('/', '%2F')}}" target="_blank">
             {% if "episode" in x['type'] %}
-                    <img src="{{x['grandparentThumb']|plex_img}}">
-                    <p>{{x['parentIndex']}}x{{x['index']}}</p>
+                <div class="posterimage" style="background-image: url({{x['grandparentThumb']|plex_img}})"></div>
+                <p>{{x['parentIndex']}}x{{x['index']}}</p>
             {% else %}
-                    <img src="{{ x['thumb']|plex_img}}">
+                <div class="posterimage" style="background-image: url({{ x['thumb']|plex_img}})"></div>
             {% endif %}
         </a>
     {% endfor %}
