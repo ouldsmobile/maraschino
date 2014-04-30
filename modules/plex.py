@@ -29,6 +29,8 @@ def miliseconds(ms):
     hours, minutes = divmod(int(ms)/60000, 60)
     if hours is 0:
         return '%i min' % (minutes)
+    if hours is 1 and minutes is 0:
+        return '60 mins'
     return '%i hr %i min' % (hours, minutes)
 
 FILTERS['miliseconds'] = miliseconds
@@ -151,17 +153,22 @@ def xhr_plex_refresh(id):
 
 @app.route('/xhr/plex/img/')
 @app.route('/xhr/plex/img/<path:path>/')
+@app.route('/xhr/plex/img/<path:path>/<int:width>/<int:height>/')
 @requires_auth
-def xhr_plex_image(path=''):
+def xhr_plex_image(path='', width=0, height=0):
     if path is '':
         img = RUNDIR + 'static/images/applications/Plex.png'
         return send_file(img, mimetype='image/jpeg')
 
     server = PlexServer.query.filter(PlexServer.id == get_setting_value('active_server')).first()
     p = Server(ip=server.localAddresses, token=server.token)
+    if width == 0 or height == 0:
+        image = p.image(path)
+    else:
+        image = p.image(path, width=width, height=height)
 
     try:
-        img = StringIO.StringIO(p.image(path))
+        img = StringIO.StringIO(image)
         return send_file(img, mimetype='image/jpeg')
     except:
         img = RUNDIR + 'static/images/applications/Plex.png'
