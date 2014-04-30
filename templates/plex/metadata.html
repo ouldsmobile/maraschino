@@ -5,7 +5,7 @@
 {% if item.Video %}
 <h2><a href="http://plex.tv/web/app#!/server/{{server.machineIdentifier}}/details/{{item.Video.key|replace('/', '%2F')}}" target="_blank">{{ item.Video.title }} ({{item.Video.year}})</a></h2>
 <div class="movie clearfix">
-    <img class="thumb" src="{{ item.Video.thumb|plex_img }}" alt="">
+    <img class="thumb" src="{{ item.Video.thumb|plex_img }}/200/200/" alt="">
     <h4>{{ item.Video.duration|miliseconds }}</h4>
     <p class="plot">{{ item.Video.summary }}</p>
     {% if item.Video.rating %}<p class="rating">{{ item.Video.rating|float|round(1) }}</p>{% endif %}
@@ -17,13 +17,29 @@
     </div>
     <div class="actors">
         {% for actor in item.Video.Role %}
-            <span data-id="{{actor.id}}">{{actor.tag}}{% if actor.role %} as {{actor.role}}{%endif%}</span>
+            <span data-id="{{actor.id}}">{{actor.tag}}<!-- {% if actor.role %} as {{actor.role}}{%endif%} --></span>
         {%endfor%}
     </div>
 </div>
 {% elif item.Directory %}
+<h2><a href="http://plex.tv/web/app#!/server/{{server.machineIdentifier}}/details/{{item.Directory.key|replace('/', '%2F')}}" target="_blank">{{ item.Directory.title }}</a></h2>
 <div class="tv">
-    {{ item }}
+    <img class="banner" src="{{item.Directory.banner|plex_img}}/800/400/" alt="">
+    <p class="summary">{{ item.Directory.summary}}</p>
+    <p class="summary"><b>Rating</b>: {{ item.Directory.rating|int|round(2) }}</p>
+    <p class="summary"><b>Duration</b>: {{ item.Directory.duration|miliseconds }}</p>
+    <p class="summary"><b>Rated</b>: {{ item.Directory.contentRating }}</p>
+    <p class="summary"><b>First Aired</b>: {{ item.Directory.originallyAvailableAt }}</p>
+    <p class="summary"><b>Studio</b>: {{ item.Directory.studio }}</p>
+    <p class="summary"><b>Seen</b>: {{ item.Directory.viewedLeafCount }} of {{ item.Directory.leafCount }} episodes</p>
+    {%if item.Directory.Role %}
+    <div class="actors">
+        {% for actor in item.Directory.Role[0:5] %}
+            <span data-id="{{actor.id}}">{{actor.tag}}<!-- {% if actor.role %} as {{actor.role}}{%endif%} --></span>
+        {%endfor%}
+    </div>
+    {% endif %}
+    <div class="clearfix"></div>
 </div>
 {%endif%}
 
