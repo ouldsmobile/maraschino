@@ -70,19 +70,28 @@ class Server(object):
         return sections
 
 
-    def image(self, path):
+    def image(self, path, width=None, height=None):
         if path.startswith('/'):
             path = path[1:]
 
         xargs = {}
         xargs['X-Plex-Token'] = self.__token
         url = "%s%s:%s/%s" % (self.__scheme, self.__ip, self.__port, path)
+        if width or height:
+            if width:
+                path = '%s&width=%s' % (path, width)
+            if height:
+                path = '%s&height=%s' % (path, height)
+            url = "%s%s:%s/photo/:/transcode?url=http://127.0.0.1:%s/%s" % (self.__scheme, self.__ip, self.__port, self.__port, path)
+
+        if debug:
+            print 'Image URL: %s' % (url)
 
         try:
             r = urllib2.Request(url, None, xargs)
             r = urllib2.urlopen(r)
             return r.read()
-        except:
+        except Exception, e:
             raise e
 
 

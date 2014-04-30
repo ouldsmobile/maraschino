@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) 2014 Gustavo Hoirisch <gugahoi@gmail.com>
 # Licensed under the MIT license.
+# Most of the credit for the code in this library should go to the PlexConnect guys. This was based mostly on their work.
 
 from server import Server
 from client import Client
