@@ -54,18 +54,17 @@
             float: left;
             width: 18%;
             overflow: visible;
-            margin: 1% 1% 7%;
+            margin: 1%;
             position: relative;
-            .border-radius(4px);
             display: inline-block;
-            
+
             &:before
             {
                 content: "";
                 display: block;
                 padding-top: 150%;
             }
-            
+
             .posterimage
             {
                 position: absolute;
@@ -77,21 +76,21 @@
                 background-attachment: scroll;
                 background-size: contain;
                 background-position: center center;
-                border-radius: 5px;
                 z-index: 1;
                 .border-radius(4px);
             }
-            
+
             p
             {
                 background-color: black;
                 text-align: center;
                 line-height: 25px;
                 position: absolute;
-                bottom: -22px;
+                bottom: 0;
                 left: 0;
                 right: 0;
                 color: white;
+                z-index: 1;
             }
         }
     }
