@@ -107,6 +107,7 @@ def getServers():
     # Storing server information into db
     try:
         for server in servers:
+            server['localAddresses'] = server['localAddresses'].split(',')[0]
             addServer(server['name'], server['address'], server['port'], server['scheme'], server['host'], server['localAddresses'], server['machineIdentifier'], server['createdAt'], server['updatedAt'], server['synced'], server['version'], server['owned'], server['accessToken'])
     except:
         logger.log('Plex :: Failed to store server information in database', 'ERROR')

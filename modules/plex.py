@@ -36,6 +36,12 @@ def miliseconds(ms):
 FILTERS['miliseconds'] = miliseconds
 
 
+def get_server():
+    server = PlexServer.query.filter(PlexServer.id == get_setting_value('active_server')).first()
+    p = Server(ip=server.localAddresses, token=server.token)
+    return server, p
+
+
 @app.route('/xhr/plex/')
 def plex():
     return xhr_on_deck()
@@ -44,8 +50,7 @@ def plex():
 @app.route('/xhr/plex/onDeck/')
 def xhr_on_deck():
     try:
-        server = PlexServer.query.filter(PlexServer.id == get_setting_value('active_server')).first()
-        p = Server(ip=server.localAddresses, token=server.token)
+        server, p = get_server()
         onDeck = p.onDeck()
 
         return render_template('plex/on_deck.html',
@@ -71,8 +76,7 @@ def xhr_recent_movies(title, id=None, start=0, size=5):
         type = 'photo'
 
     try:
-        server = PlexServer.query.filter(PlexServer.id == get_setting_value('active_server')).first()
-        p = Server(ip=server.localAddresses, token=server.token)
+        server, p = get_server()
         preferred = server.sections[type]['preferred']
         if id is None:
             # if no explicit id, try to get preferred id
@@ -118,8 +122,7 @@ def xhr_recent_movies(title, id=None, start=0, size=5):
 
 @app.route('/xhr/plex/section/<int:id>/')
 def xhr_plex_section(id):
-    server = PlexServer.query.filter(PlexServer.id == get_setting_value('active_server')).first()
-    p = Server(ip=server.localAddresses, token=server.token)
+    server, p = get_server()
     items = p.section(id)
     return render_template('plex/library_section.html',
         server=server,
@@ -130,7 +133,7 @@ def xhr_plex_section(id):
 @app.route('/xhr/plex/sections/<label>/')
 def xhr_plex_sections(label):
     try:
-        server = PlexServer.query.filter(PlexServer.id == get_setting_value('active_server')).first()
+        server, p = get_server()
         sections = server.sections[label]
         return render_template('plex/library_list.html',
             server=server,
@@ -143,8 +146,7 @@ def xhr_plex_sections(label):
 @app.route('/xhr/plex/refresh/<int:id>/')
 def xhr_plex_refresh(id):
     try:
-        server = PlexServer.query.filter(PlexServer.id == get_setting_value('active_server')).first()
-        p = Server(ip=server.localAddresses, token=server.token)
+        server, p = get_server()
         p = p.refreshSection(id)
         return jsonify({'success': p})
     except:
@@ -160,8 +162,7 @@ def xhr_plex_image(path='', width=0, height=0):
         img = RUNDIR + 'static/images/applications/Plex.png'
         return send_file(img, mimetype='image/jpeg')
 
-    server = PlexServer.query.filter(PlexServer.id == get_setting_value('active_server')).first()
-    p = Server(ip=server.localAddresses, token=server.token)
+    server, p = get_server()
     if width == 0 or height == 0:
         image = p.image(path)
     else:
@@ -178,8 +179,7 @@ def xhr_plex_image(path='', width=0, height=0):
 @app.route('/xhr/plex/now_playing/')
 def xhr_plex_now_playing():
     try:
-        server = PlexServer.query.filter(PlexServer.id == get_setting_value('active_server')).first()
-        p = Server(ip=server.localAddresses, token=server.token)
+        server, p = get_server()
         clients = p.nowPlaying()
         if int(clients['size']) == 0:
             return jsonify(playing=False)
@@ -215,8 +215,7 @@ def xhr_plex_now_playing():
 @app.route('/xhr/plex/client/<machineIdentifier>/<command>/')
 def xhr_plex_client(machineIdentifier, command):
     try:
-        server = PlexServer.query.filter(PlexServer.id == get_setting_value('active_server')).first()
-        p = Server(ip=server.localAddresses, token=server.token)
+        server, p = get_server()
         clients = p.clients()
         for client in clients:
             if client['machineIdentifier'] == machineIdentifier:
@@ -233,8 +232,7 @@ def xhr_plex_client(machineIdentifier, command):
 @app.route('/xhr/plex/metadata/<int:id>/')
 @app.route('/xhr/plex/metadata/<path:id>/')
 def plex_metadata(id):
-    server = PlexServer.query.filter(PlexServer.id == get_setting_value('active_server')).first()
-    p = Server(ip=server.localAddresses, token=server.token)
+    server, p = get_server()
     item=p.metadata(id)
     return render_template('plex/metadata.html',
         server=server,
