@@ -193,18 +193,6 @@ AVAILABLE_MODULES = [
         'static': True,
         'poll': 0,
         'delay': 0,
-        'settings': [
-            {
-                'key': 'myPlex_username',
-                'value': '',
-                'description': 'myPlex Username',
-            },
-            {
-                'key': 'myPlex_password',
-                'value': '',
-                'description': 'myPlex password',
-            },
-        ]
     },
     {
         'name': 'plex_recent_movies',
@@ -669,6 +657,21 @@ SEARCH_SETTINGS = [
     },
 ]
 
+
+PLEX = [
+    {
+        'key': 'myPlex_username',
+        'value': '',
+        'description': 'myPlex username',
+    },
+    {
+        'key': 'myPlex_password',
+        'value': '',
+        'description': 'myPlex password',
+    },
+]
+
+
 @app.route('/xhr/add_module_dialog')
 @requires_auth
 def add_module_dialog():
@@ -875,10 +878,10 @@ def module_settings_save(name):
 
     if name == 'server_settings':
         return extra_settings_dialog(dialog_type='server_settings', updated=True)
-    elif name == 'plex':
-        from maraschino.noneditable import populatePlexServers
+    elif name == 'plex_login':
+        from maraschino.noneditable import login
         try:
-            populatePlexServers()
+            return login()
         except:
             logger.log('Plex :: Failed to populate servers with new credentials', 'ERROR')
 
@@ -911,14 +914,19 @@ def extra_settings_dialog(dialog_type, updated=False):
         settings = copy.copy(SERVER_SETTINGS)
         dialog_title = 'Server settings'
 
+    elif dialog_type == 'plex_login':
+        settings = copy.copy(PLEX)
+        dialog_text = 'Credentials to log into http://plex.tv.'
+        dialog_title = 'myPlex Credentials'
+
     else:
         return jsonify({ 'status': 'error' })
 
     for s in settings:
-         setting = get_setting(s['key'])
+        setting = get_setting(s['key'])
 
-         if setting:
-             s['value'] = setting.value
+        if setting:
+            s['value'] = setting.value
 
     return render_template('dialogs/extra_settings_dialog.html',
         dialog_title=dialog_title,

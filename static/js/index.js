@@ -357,6 +357,23 @@ $(document).ready(function() {
     }
   });
 
+  $(document).on('click', '#server_choice li.switch_server', function() {
+    var el = $(this);
+    add_loading_gif(el);
+    var id = el.data('server_id');
+    $.get(WEBROOT+'/xhr/plex/sections/update/'+id, function(data) {
+      if(data.success){
+        $.get(WEBROOT+'/xhr/switch_server/'+id, function(data) {
+          window.location.reload();
+        });
+      } else {
+        remove_loading_gif(el);
+        popup_message(data.msg);
+      }
+    });
+  });
+
+
   $(document).on('change', 'select#change_movies, select#change_albums, select#change_episodes, select#change_photos', function(event) {
     var parent = $(this).parent(".module").attr('id');
     $.get(WEBROOT + '/xhr/'+ parent +'/'+$(this).val()+'/', function(data){
@@ -2140,7 +2157,11 @@ $(document).ready(function() {
         confirm_selector: '.choices .save',
         on_confirm: function() {
           var settings = popup.find('form').serializeArray();
-
+          if(dialog_type == 'plex_login'){
+              var wait = $('<div id="server_choice" class="dialog" align="center"><div class="close"></div><p>Updating Plex Information  <img src="' + WEBROOT + '/static/images/xhrloading.gif"/></p></div>');
+              $('body').append(wait);
+              wait.showPopup({ dispose: true });
+          }
           $.post(WEBROOT + '/xhr/module_settings_save/' + dialog_type,
             { settings: JSON.stringify(settings) },
             function(data) {
@@ -2149,6 +2170,19 @@ $(document).ready(function() {
                 $('body').data('search_enabled', search_enabled_val);
               } else if (dialog_type === 'misc_settings') {
                 window.location.reload();
+              } else if (dialog_type === 'plex_login') {
+                if(data.success){
+                  $('#server_settings .submenu ul').html('');
+                  $('#server_choice p').replaceWith('<p>Please select your server:</p><ul></ul>');
+                  var string = '';
+                  for (var i = 0; i < data.servers.length; i++) {
+                    string = '<li class="switch_server" data-server_id="'+data.servers[i][1]+'">'+data.servers[i][0]+'</li>';
+                    $('#server_choice ul').append(string);
+                    $('#server_settings .submenu ul').append(string);
+                  }
+                } else {
+                  popup_message(data.msg);
+                }
               }
             }
           );

@@ -53,6 +53,43 @@ def tutorial_save():
         return jsonify(success=False, msg='Servers not populated Successfully')
 
 
+@app.route('/xhr/plex/login/')
+@requires_auth
+def json_login():
+    if not loginToPlex():
+        return jsonify(success=False, msg='Failed to login to plex.tv, plese make sure this is a valid username/password.')
+
+    # Delete info for previous accounts
+    try:
+        PlexServer.query.delete()
+    except:
+        logger.log('Plex :: Failed to delete old server info', 'WARNING')
+
+    # Populate servers for new user
+    if not getServers():
+        return jsonify(success=False, msg='Failed to retrieve server information from https://plex.tv/pms/servers.')
+
+    # Set active server to 0 (no server selected)
+    try:
+        active_server = get_setting('active_server')
+
+        if not active_server:
+            active_server = Setting('active_server', 0)
+            db_session.add(active_server)
+            db_session.commit()
+
+        else:
+            active_server.value = 0
+            db_session.add(active_server)
+            db_session.commit()
+
+    except:
+        logger.log('Plex :: Failed to reset server, please make sure to select new one.', 'WARNING')
+
+    # return a list of (server name, server id)
+    return jsonify(success=True, servers=listServers())
+
+
 
 @app.route('/xhr/plex/login/<username>/<password>/') # for testing purposes only
 @requires_auth
