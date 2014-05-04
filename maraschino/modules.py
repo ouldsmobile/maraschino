@@ -879,9 +879,9 @@ def module_settings_save(name):
     if name == 'server_settings':
         return extra_settings_dialog(dialog_type='server_settings', updated=True)
     elif name == 'plex_login':
-        from maraschino.noneditable import login
+        from maraschino.noneditable import json_login
         try:
-            return login()
+            return json_login()
         except:
             logger.log('Plex :: Failed to populate servers with new credentials', 'ERROR')
 
