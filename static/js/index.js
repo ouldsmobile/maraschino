@@ -414,6 +414,11 @@ $(document).ready(function() {
     });
   });
 
+  $(document).on('click', '#plex .tv .seasons li', function(event) {
+    $.get(WEBROOT+'/xhr/plex/season'+$(this).data('url'), function(data) {
+      $('#plex').replaceWith(data);
+    });
+  });
   /*** END PLEX ***/
 
   /*** SICKBEARD ***/

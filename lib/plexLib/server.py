@@ -281,3 +281,16 @@ class Server(object):
         XML = self.getXML(path)
         return xml_to_dict(XML.getroot())
 
+    def seasons(self, id):
+        path = "/library/metadata/%s/children" % id
+        XML = self.getXML(path)
+        return xml_to_dict(XML.getroot())
+
+    def allEpisodes(self, id):
+        path = "/library/metadata/%s/allLeaves" % id
+        XML = self.getXML(path)
+        return xml_to_dict(XML.getroot())
+
+    def generic(self, path):
+        XML = self.getXML(path)
+        return xml_to_dict(XML.getroot())

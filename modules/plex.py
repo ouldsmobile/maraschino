@@ -230,11 +230,40 @@ def xhr_plex_client(machineIdentifier, command):
         return jsonify(success=False)
 
 @app.route('/xhr/plex/metadata/<int:id>/')
-@app.route('/xhr/plex/metadata/<path:id>/')
 def plex_metadata(id):
     server, p = get_server()
-    item=p.metadata(id)
+    item = p.metadata(id)
+    seasons = None
+    type = None
+
+    for section in server.sections:
+        for s in server.sections[section]['sections']:
+            if server.sections[section]['sections'][s]['key'] == item['librarySectionID']:
+                type = section
+                break
+
+    try:
+        if 'show' in item['Directory']['type']:
+            seasons = p.seasons(id)['Directory']
+    except:
+        pass
+
     return render_template('plex/metadata.html',
+        type=type,
         server=server,
+        seasons=seasons,
         item=item
     )
+
+
+@app.route('/xhr/plex/season/<path:id>/')
+def plex_season(id):
+    server, p = get_server()
+    item = p.generic(id)
+
+    return render_template('plex/season.html',
+        server=server,
+        episodes=item
+    )
+
+

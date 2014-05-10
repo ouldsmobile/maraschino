@@ -2,51 +2,55 @@
 
 {% block content %}
 
-{% if item.Video %}
-<h2><a href="http://plex.tv/web/app#!/server/{{server.machineIdentifier}}/details/{{item.Video.key|replace('/', '%2F')}}" target="_blank">{{ item.Video.title }} ({{item.Video.year}})</a></h2>
-<div class="movie clearfix">
-    <div class="images">
-        <img class="thumb" src="{{ item.Video.thumb|plex_img }}/200/200/">
-        <img class="fanart" src="{{ item.Video.art|plex_img }}/400/200/">
-    </div>
-    <p class="plot">{{ item.Video.summary }}</p>
-    <p class="duration"><b>Duration:</b> {{ item.Video.duration|miliseconds }}</p>
-    {% if item.Video.rating %}<p class="rating"><b>Rating: </b>{{ item.Video.rating|float|round(1) }}</p>{% endif %}
-    {% if item.Video.contentRating %}<p class="contentRating"><b>Content Rating: </b>{{ item.Video.contentRating }}</p>{% endif %}
-    {% if item.Video.studio %}<p class="studio"><b>Studio: </b>{{ item.Video.studio }}</p>{% endif %}
-    {% if item.Video.addedAt %}<p class="dateAdded"><b>Date Added: </b>{{ item.Video.addedAt|float|time }}</p>{% endif %}
+{% if 'movie' in type %}
+    <h2><a href="http://plex.tv/web/app#!/server/{{server.machineIdentifier}}/details/{{item.Video.key|replace('/', '%2F')}}" target="_blank">{{ item.Video.title }} ({{item.Video.year}})</a></h2>
+    <div class="movie clearfix">
+        <div class="images">
+            <img class="thumb" src="{{ item.Video.thumb|plex_img }}/200/200/">
+            <img class="fanart" src="{{ item.Video.art|plex_img }}/400/200/">
+        </div>
+        <p class="plot">{{ item.Video.summary }}</p>
+        <p class="duration"><b>Duration:</b> {{ item.Video.duration|miliseconds }}</p>
+        {% if item.Video.rating %}<p class="rating"><b>Rating: </b>{{ item.Video.rating|float|round(1) }}</p>{% endif %}
+        {% if item.Video.contentRating %}<p class="contentRating"><b>Content Rating: </b>{{ item.Video.contentRating }}</p>{% endif %}
+        {% if item.Video.studio %}<p class="studio"><b>Studio: </b>{{ item.Video.studio }}</p>{% endif %}
+        {% if item.Video.addedAt %}<p class="dateAdded"><b>Date Added: </b>{{ item.Video.addedAt|float|time }}</p>{% endif %}
 
-    <div class="actors">
-    {% for actor in item.Video.Role %}
-        <span data-id="{{actor.id}}">{{actor.tag}}<!-- {% if actor.role %} as {{actor.role}}{%endif%} --></span>
-    {%endfor%}
-    </div>
-    <div class="genres">
-        {% for genre in item.Video.Genre %}
-            <span data-id="{{genre.id}}">{{genre.tag}}</span>
-        {%endfor%}
-    </div>
-</div>
-{% elif item.Directory %}
-<h2><a href="http://plex.tv/web/app#!/server/{{server.machineIdentifier}}/details/{{item.Directory.key|replace('/', '%2F')}}" target="_blank">{{ item.Directory.title }}</a></h2>
-<div class="tv">
-    <img class="banner" src="{{item.Directory.banner|plex_img}}/800/400/" alt="">
-    <p class="summary">{{ item.Directory.summary}}</p>
-    <p class="summary"><b>Rating</b>: {{ item.Directory.rating|int|round(2) }}</p>
-    <p class="summary"><b>Duration</b>: {{ item.Directory.duration|miliseconds }}</p>
-    <p class="summary"><b>Rated</b>: {{ item.Directory.contentRating }}</p>
-    <p class="summary"><b>First Aired</b>: {{ item.Directory.originallyAvailableAt }}</p>
-    <p class="summary"><b>Studio</b>: {{ item.Directory.studio }}</p>
-    <p class="summary"><b>Seen</b>: {{ item.Directory.viewedLeafCount }} of {{ item.Directory.leafCount }} episodes</p>
-    {%if item.Directory.Role %}
-    <div class="actors">
-        {% for actor in item.Directory.Role[0:5] %}
+        <div class="actors">
+        {% for actor in item.Video.Role %}
             <span data-id="{{actor.id}}">{{actor.tag}}<!-- {% if actor.role %} as {{actor.role}}{%endif%} --></span>
         {%endfor%}
+        </div>
+        <div class="genres">
+            {% for genre in item.Video.Genre %}
+                <span data-id="{{genre.id}}">{{genre.tag}}</span>
+            {%endfor%}
+        </div>
     </div>
+{% elif 'show' in type %}
+    {% if 'season' in item.Directory.type %}
+        {{seasons}}
+    {% else %}
+        <h2><a href="http://plex.tv/web/app#!/server/{{server.machineIdentifier}}/details/{{item.Directory.key|replace('/', '%2F')}}" target="_blank">{{ item.Directory.title }}</a></h2>
+        <div class="tv">
+            <img class="banner" src="{{item.Directory.banner|plex_img}}/800/400/" alt="">
+            <p class="summary">{{ item.Directory.summary}}</p>
+            <p class="summary"><b>Rating</b>: {{ item.Directory.rating|int|round(2) }}</p>
+            <p class="summary"><b>Duration</b>: {{ item.Directory.duration|miliseconds }}</p>
+            <p class="summary"><b>Rated</b>: {{ item.Directory.contentRating }}</p>
+            <p class="summary"><b>First Aired</b>: {{ item.Directory.originallyAvailableAt }}</p>
+            <p class="summary"><b>Studio</b>: {{ item.Directory.studio }}</p>
+            <p class="summary"><b>Seen</b>: {{ item.Directory.viewedLeafCount }} of {{ item.Directory.leafCount }} episodes</p>
+            <ul class="seasons">
+                {% for season in seasons %}
+                <li data-url="{{ season.key }}" data-id="{{ season.ratingKey }}">
+                    <img src="{{season.thumb|plex_img}}/100/100" class="season"> <br>
+                    <span>{{season.title}}</span>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
     {% endif %}
-    <div class="clearfix"></div>
-</div>
 {%endif%}
 
 {% endblock %}

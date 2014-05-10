@@ -177,6 +177,7 @@
             }
         }
     }
+
     div.movie
     {
         padding: 10px;
@@ -246,6 +247,19 @@
             margin: 5px;
         }
 
+        ul
+        {
+            li
+            {
+                display: inline-block;
+                width: 20%;
+                text-align: center;
+                cursor: pointer;
+                margin: 2%;
+                .border-radius(4px);
+            }
+        }
+
         div.genres,
         div.actors
         {
@@ -276,5 +290,46 @@
         {
             background-color: rgba(0, 255, 0, 0.3);
         }
+    }
+
+    div.season
+    {
+        div.left
+        {
+            float: left;
+            width: 20%;
+            img { width: 100%; }
+            h3
+            {
+                text-align: center;
+                padding: 10px;
+            }
+        }
+        ul
+        {
+            width: 79%;
+            float: right;
+            li
+            {
+                background: url('/@{webroot}/images/alpha/fff_10.png');
+                padding: 5px 15px;
+                border: 1px solid #222;
+                margin-top: 5px;
+                line-height: 1.3em;
+                cursor: pointer;
+                .border-radius(4px);
+
+                a
+                {
+                    color: white;
+                }
+
+                &:hover
+                {
+                    background: url('/@{webroot}/images/alpha/fff_20.png');
+                }
+            }
+        }
+
     }
 }
