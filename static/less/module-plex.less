@@ -180,28 +180,36 @@
     div.movie
     {
         padding: 10px;
-        img.thumb
+        text-align: justify;
+        div.images
         {
-            width: 20%;
-            margin: 5px;
-            float: left;
+            img.thumb
+            {
+                width: 27%;
+            }
+            img.fanart
+            {
+                width: 72%;
+            }
         }
 
-        p.plot
+        p
         {
-            text-align: justify;
+            padding: 5px;
         }
 
         div.genres,
         div.actors
         {
             clear: both;
+            line-height: 30px;
+            white-space: nowrap;
+            overflow-x: auto;
             span
             {
                 background: url('/@{webroot}/images/alpha/fff_10.png');
                 margin: 2px;
                 padding: 5px;
-                float: left;
                 cursor: pointer;
                 .border-radius(4px);
 
