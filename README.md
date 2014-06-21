@@ -1,9 +1,5 @@
-#Maraschino
-
-* **Maintainer**: [Gustavo Hoirisch](https://github.com/gugahoi)
-
-[![Support](http://img.shields.io/gittip/JSFiddle.svg)](https://www.gittip.com/gugahoi)
-[![Donate](https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=GCWQGNUWR2WGY)
+#Maraschino [![Support via Gittip](http://b.repl.ca/v1/gittip-support-brightgreen.png)](https://www.gittip.com/gugahoi) [![Donate](https://www.paypalobjects.com/en_US/i/btn/btn_donate_
+* **Maintainer**: [Gustavo Hoirisch](https://github.com/gugahoi)LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=GCWQGNUWR2WGY)
 
 
 ##What is Maraschino?
