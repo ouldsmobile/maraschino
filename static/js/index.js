@@ -747,6 +747,12 @@ $(document).ready(function() {
     });
   });
 
+  // History Menu
+  $(document).on('click', '#nzbdrone .menu .history', function(){
+    $.get(WEBROOT + '/xhr/nzbdrone/history/', function(data){
+      $('#nzbdrone').replaceWith(data);
+    });
+  });
   /******  END NZBDRONE Functions  *******/
 
   /*********** EXTRA SETTINGS *************/
