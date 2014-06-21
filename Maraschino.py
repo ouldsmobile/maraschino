@@ -51,6 +51,7 @@ def import_modules():
     import modules.index
     import modules.ipcamera
     import modules.log
+    import modules.nzbdrone
     import modules.nzbget
     import modules.plex
     import modules.sabnzbd
