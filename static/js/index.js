@@ -452,7 +452,6 @@ $(document).ready(function() {
     var id = ($(this).attr('id'));
   });
 
-
   // Load show info from banner display
   $(document).on('click', '#sickbeard .coming_ep .options img.banner', function(){
     var tvdb = $(this).attr('id');
@@ -753,6 +752,18 @@ $(document).ready(function() {
       $('#nzbdrone').replaceWith(data);
     });
   });
+
+  // Load search results
+  $(document).on('keypress', '#nzbdrone .powerholder input', function(e){
+    if(e.which == 13){
+      e.preventDefault();
+      add_loading_gif($('#nzbdrone .powerholder .loading'));
+      $.get(WEBROOT + '/xhr/nzbdrone/search/'+$(this).val(), function(data){
+        $('#nzbdrone').replaceWith(data);
+      });
+    }
+  });
+
   /******  END NZBDRONE Functions  *******/
 
   /*********** EXTRA SETTINGS *************/
