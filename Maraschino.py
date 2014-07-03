@@ -53,6 +53,7 @@ def import_modules():
     import modules.log
     import modules.nzbget
     import modules.plex
+    import modules.rtorrentdl
     import modules.sabnzbd
     import modules.script_launcher
     import modules.search
